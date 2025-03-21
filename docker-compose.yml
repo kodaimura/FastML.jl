@@ -1,0 +1,8 @@
+services:
+  julia:
+    image: julia:1.11
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
