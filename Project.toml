@@ -11,7 +11,6 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 [compat]
 Flux = "0.16.3"
 Plots = "1.40.11"
-Revise = "3.7.2"
 julia = "1.11"
 
 [extras]
