@@ -1,5 +1,7 @@
 module FastML
 
-# Write your package code here.
+export LinearRegression, train!, predict, get_model
+
+include("linear_regression.jl")
 
 end

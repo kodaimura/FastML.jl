@@ -1,5 +1,3 @@
-module LinearRegression
-
 using Flux
 
 export LinearRegression, train!, predict, get_model
@@ -49,11 +47,11 @@ end
 
 function create_loss_function(lr::LinearRegression)
     reg_type = lr.reg_type
-    if reg_type == RegType.L1
+    if reg_type == L1
         return (model::Flux.Dense, x, y) -> loss_lasso(model, x, y, lr.lambda1)
-    elseif reg_type == RegType.L2
+    elseif reg_type == L2
         return (model::Flux.Dense, x, y) -> loss_ridge(model, x, y, lr.lambda2)
-    elseif reg_type == RegType.ElasticNet
+    elseif reg_type == ElasticNet
         return (model::Flux.Dense, x, y) -> loss_elastic_net(model, x, y, lr.lambda1, lr.lambda2)
     else
         return (model::Flux.Dense, x, y) -> loss_mse(model, x, y)
@@ -143,6 +141,4 @@ end
 
 function train_model!(loss, model::Flux.Dense, data; learning_rate=0.01)
     Flux.train!(loss, model, data, Descent(learning_rate))
-end
-
 end
