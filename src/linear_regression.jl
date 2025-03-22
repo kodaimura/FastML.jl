@@ -20,7 +20,7 @@ mutable struct LinearRegression
         lambda2::Float64 = 0.0,
         learning_rate::Float64 = 0.1,
         max_epochs::Int = 1000,
-        tolerance::Float64 = 1e-6
+        tolerance::Float64 = 1e-5
     )
     
         return new(
@@ -36,13 +36,36 @@ mutable struct LinearRegression
     end
 end
 
-function predict(lr::LinearRegression, X)
+function predict(lr::LinearRegression, features)
     model = lr._model
-    return model(X)
+    return model(features)
 end
 
-function get_model(lr::LinearRegression)
+function get_model(lr::LinearRegression)::Flux.Dense
     return lr._model
+end
+
+function train!(lr::LinearRegression, data)::Tuple{Bool, Int, Float64}
+    features = hcat([d[1] for d in data]...)
+    labels = hcat([d[2] for d in data]...)
+    train!(lr, features, labels)
+end
+
+function train!(lr::LinearRegression, features, labels)::Tuple{Bool, Int, Float64}
+    model = lr._model
+    loss = create_loss_function(lr)
+    prev_loss = Inf
+    epoch_loss = 0.0
+    for epoch in 1:lr.max_epochs
+        train_model!(loss, model, features, labels; learning_rate=lr.learning_rate)
+        epoch_loss = loss(model, features, labels)
+
+        if abs(prev_loss - epoch_loss) < lr.tolerance
+            return true, epoch, epoch_loss
+        end
+        prev_loss = epoch_loss
+    end
+    return false, lr.max_epochs, epoch_loss
 end
 
 function create_loss_function(lr::LinearRegression)
@@ -55,52 +78,6 @@ function create_loss_function(lr::LinearRegression)
         return (model::Flux.Dense, x, y) -> loss_elastic_net(model, x, y, lr.lambda1, lr.lambda2)
     else
         return (model::Flux.Dense, x, y) -> loss_mse(model, x, y)
-    end
-end
-
-function train!(lr::LinearRegression, data)
-    model = lr._model
-    loss = create_loss_function(lr)
-    x = hcat([d[1] for d in data]...)
-    y = hcat([d[2] for d in data]...)
-    loss_prev = Inf
-    for epoch in 1:lr.max_epochs
-        train_model!(loss, model, data; learning_rate=lr.learning_rate)
-        current_loss = loss(model, x, y)
-
-        if loss_prev == Inf
-            loss_prev = current_loss
-            continue
-        end
-
-        if current_loss < 1 && abs(loss_prev - current_loss) < lr.tolerance
-            println("Converged at epoch $epoch with loss $current_loss")
-            break
-        end
-        loss_prev = current_loss
-    end
-end
-
-function train!(lr::LinearRegression, features, labels)
-    model = lr._model
-    loss = create_loss_function(lr)
-    x = features
-    y = labels
-    loss_prev = Inf
-    for epoch in 1:lr.max_epochs
-        train_model!(loss, model, data; learning_rate=lr.learning_rate)
-        current_loss = loss(model, x, y)
-
-        if loss_prev == Inf
-            loss_prev = current_loss
-            continue
-        end
-
-        if current_loss < 1 && abs(loss_prev - current_loss) < lr.tolerance
-            println("Converged at epoch $epoch with loss $current_loss")
-            break
-        end
-        loss_prev = current_loss
     end
 end
 
@@ -135,7 +112,7 @@ end
 #end
 
 function train_model!(loss, model::Flux.Dense, features, labels; learning_rate=0.01)
-    data = [(features[:, i], labels[:, i]) for i in 1:size(features, 2)]
+    data = [(features[:, i], labels[i]) for i in 1:size(features, 2)]
     train_model!(loss, model, data; learning_rate=learning_rate)
 end
 
