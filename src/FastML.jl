@@ -1,6 +1,6 @@
 module FastML
 
-export LinearRegression, train!, predict, get_model
+export LinearRegression, train!, predict, weight, bias
 
 include("linear_regression.jl")
 

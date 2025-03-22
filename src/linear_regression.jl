@@ -1,6 +1,6 @@
 using Flux
 
-export LinearRegression, train!, predict, get_model
+export LinearRegression, train!, predict, weight, bias
 
 @enum RegType None L1 L2 ElasticNet
 
@@ -36,13 +36,22 @@ mutable struct LinearRegression
     end
 end
 
+function get_model(lr::LinearRegression)
+    return lr._model
+end
+
 function predict(lr::LinearRegression, features)
-    model = lr._model
+    model = get_model(lr)
     return model(features)
 end
 
-function get_model(lr::LinearRegression)::Flux.Dense
-    return lr._model
+
+function weight(lr::LinearRegression)
+    return get_model(lr).weight
+end
+
+function bias(lr::LinearRegression)
+    return get_model(lr).bias
 end
 
 function train!(lr::LinearRegression, data)::Tuple{Bool, Int, Float64}
@@ -52,7 +61,7 @@ function train!(lr::LinearRegression, data)::Tuple{Bool, Int, Float64}
 end
 
 function train!(lr::LinearRegression, features, labels)::Tuple{Bool, Int, Float64}
-    model = lr._model
+    model = get_model(lr)
     loss = create_loss_function(lr)
     prev_loss = Inf
     epoch_loss = 0.0

@@ -12,9 +12,11 @@ using Plots
     train!(model, data)
     predicted_values = predict(model, x)
 
-    m = get_model(model)
+    w = weight(model)
+    b = bias(model)
+
     plot(vec(x), vec(y), seriestype = :scatter, label="True values", title="Model Training")
-    plot!((x) -> m.bias[1] + m.weight[1] * x, label="After Training", lw=2)
+    plot!((x) -> b[1] + w[1] * x, label="After Training", lw=2)
 
     savefig("linear_regression.png")
 end
