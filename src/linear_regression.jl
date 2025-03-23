@@ -1,6 +1,5 @@
 using Flux
 using Statistics
-using Plots
 
 export LinearRegression, train!, predict, r2, weight, bias
 
