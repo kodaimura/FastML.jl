@@ -1,7 +1,8 @@
 using Flux
 using Statistics
+using Plots
 
-export LinearRegression, train!, predict, r2, weight, bias
+export LinearRegression, train!, predict, r2, weight, bias, plot
 
 @enum RegType None L1 L2 ElasticNet
 
@@ -136,6 +137,17 @@ function r2(lr::LinearRegression, features, labels)
 
     ss_tot = sum((y .- mean(y)) .^ 2)
     ss_res = sum((y .- y_pred) .^ 2)
-    
+
     return 1 - ss_res / ss_tot
+end
+
+function plot(lr::LinearRegression, features, labels; save_path="")
+    w = weight(lr)
+    b = bias(lr)
+    Plots.plot(vec(features), vec(labels), seriestype = :scatter, label="True values", title="Model Training")
+    Plots.plot!((x) -> b[1] + w[1] * x, label="After Training", lw=2)
+
+    if save_path != ""
+        Plots.savefig(save_path)
+    end
 end

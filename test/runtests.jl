@@ -1,6 +1,5 @@
 using FastML
 using Test
-using Plots
 
 @testset "FastML.jl" begin
     f(x) = 3x + 5
@@ -16,11 +15,5 @@ using Plots
     println(r2(model, x_train, y_train))
     println(r2(model, x_test, y_test))
 
-    w = weight(model)
-    b = bias(model)
-
-    plot(vec(x), vec(y), seriestype = :scatter, label="True values", title="Model Training")
-    plot!((x) -> b[1] + w[1] * x, label="After Training", lw=2)
-
-    savefig("linear_regression.png")
+    plot(model, x, y; save_path="linear_regression.png")
 end
