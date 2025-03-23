@@ -1,11 +1,13 @@
 module FastML
 
-export LinearRegression, train!, predict, r2, weight, bias
-
 include("linear_regression.jl")
+include("polynomial_regression.jl")
 
+using .LinearRegression
+using .PolynomialRegression
 using Random
 
+export Model, train!, predict, r2, weight, bias
 export split_data
 
 function split_data(x, y, test_size::Float64)

@@ -1,11 +1,13 @@
+module LinearRegression
+
 using Flux
 using Statistics
 
-export LinearRegression, train!, predict, r2, weight, bias
+export Model, train!, predict, r2, weight, bias
 
 @enum RegType None L1 L2 ElasticNet
 
-mutable struct LinearRegression
+mutable struct Model
     input_size::Int
     reg_type::RegType
     lambda1::Float64
@@ -15,7 +17,7 @@ mutable struct LinearRegression
     tolerance::Float64
     _model::Flux.Dense
 
-    function LinearRegression(input_size::Int = 1;
+    function Model(input_size::Int = 1;
         reg_type::RegType = None,
         lambda1::Float64 = 0.0,
         lambda2::Float64 = 0.0,
@@ -37,55 +39,55 @@ mutable struct LinearRegression
     end
 end
 
-function get_model(lr::LinearRegression)
-    return lr._model
+function get_model(lrm::Model)
+    return lrm._model
 end
 
-function predict(lr::LinearRegression, features)
-    model = get_model(lr)
+function predict(lrm::Model, features)
+    model = get_model(lrm)
     return model(features)
 end
 
 
-function weight(lr::LinearRegression)
-    return get_model(lr).weight
+function weight(lrm::Model)
+    return get_model(lrm).weight
 end
 
-function bias(lr::LinearRegression)
-    return get_model(lr).bias
+function bias(lrm::Model)
+    return get_model(lrm).bias
 end
 
-function train!(lr::LinearRegression, data)::Tuple{Bool, Int, Float64}
+function train!(lrm::Model, data)::Tuple{Bool, Int, Float64}
     features = hcat([d[1] for d in data]...)
     labels = hcat([d[2] for d in data]...)
-    train!(lr, features, labels)
+    train!(lrm, features, labels)
 end
 
-function train!(lr::LinearRegression, features, labels)::Tuple{Bool, Int, Float64}
-    model = get_model(lr)
-    loss = create_loss_function(lr)
+function train!(lrm::Model, features, labels)::Tuple{Bool, Int, Float64}
+    model = get_model(lrm)
+    loss = create_loss_function(lrm)
     prev_loss = Inf
     epoch_loss = 0.0
-    for epoch in 1:lr.max_epochs
-        train_model!(loss, model, features, labels; learning_rate=lr.learning_rate)
+    for epoch in 1:lrm.max_epochs
+        train_model!(loss, model, features, labels; learning_rate=lrm.learning_rate)
         epoch_loss = loss(model, features, labels)
 
-        if abs(prev_loss - epoch_loss) < lr.tolerance
+        if abs(prev_loss - epoch_loss) < lrm.tolerance
             return true, epoch, epoch_loss
         end
         prev_loss = epoch_loss
     end
-    return false, lr.max_epochs, epoch_loss
+    return false, lrm.max_epochs, epoch_loss
 end
 
-function create_loss_function(lr::LinearRegression)
-    reg_type = lr.reg_type
+function create_loss_function(lrm::Model)
+    reg_type = lrm.reg_type
     if reg_type == L1
-        return (model::Flux.Dense, x, y) -> loss_lasso(model, x, y, lr.lambda1)
+        return (model::Flux.Dense, x, y) -> loss_lasso(model, x, y, lrm.lambda1)
     elseif reg_type == L2
-        return (model::Flux.Dense, x, y) -> loss_ridge(model, x, y, lr.lambda2)
+        return (model::Flux.Dense, x, y) -> loss_ridge(model, x, y, lrm.lambda2)
     elseif reg_type == ElasticNet
-        return (model::Flux.Dense, x, y) -> loss_elastic_net(model, x, y, lr.lambda1, lr.lambda2)
+        return (model::Flux.Dense, x, y) -> loss_elastic_net(model, x, y, lrm.lambda1, lrm.lambda2)
     else
         return (model::Flux.Dense, x, y) -> loss_mse(model, x, y)
     end
@@ -130,12 +132,14 @@ function train_model!(loss, model::Flux.Dense, data; learning_rate=0.01)
     Flux.train!(loss, model, data, Descent(learning_rate))
 end
 
-function r2(lr::LinearRegression, features, labels)
+function r2(lrm::Model, features, labels)
     y = labels
-    y_pred = predict(lr, features)
+    y_pred = predict(lrm, features)
 
     ss_tot = sum((y .- mean(y)) .^ 2)
     ss_res = sum((y .- y_pred) .^ 2)
 
     return 1 - ss_res / ss_tot
+end
+
 end

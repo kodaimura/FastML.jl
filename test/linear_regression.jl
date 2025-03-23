@@ -2,6 +2,8 @@ using Test
 using FastML
 using Plots
 
+gr()
+
 @testset "linear_regression" begin
     f(x) = 3x + 5
     data = [([x + rand(Float32)], f(x) + rand(Float32)) for x in -3:0.1f0:3]
@@ -9,14 +11,14 @@ using Plots
     y = hcat([d[2] for d in data]...)
 
     x_train, y_train, x_test, y_test = split_data(x, y, 0.2)
-    model = LinearRegression(1;learning_rate=0.01,max_epochs=10000,tolerance=1e-6)
-    train!(model, x_train, y_train)
+    model = FastML.LinearRegression.Model(1;learning_rate=0.01,max_epochs=10000,tolerance=1e-6)
+    FastML.LinearRegression.train!(model, x_train, y_train)
 
-    @test 1 > r2(model, x_train, y_train) > 0.9
-    @test 1 > r2(model, x_test, y_test) > 0.9
+    @test 1 > FastML.LinearRegression.r2(model, x_train, y_train) > 0.9
+    @test 1 > FastML.LinearRegression.r2(model, x_test, y_test) > 0.9
 
-    w = weight(model)
-    b = bias(model)
+    w = FastML.LinearRegression.weight(model)
+    b = FastML.LinearRegression.bias(model)
     Plots.plot(vec(x), vec(y), seriestype = :scatter, label="True values", title="Model Training")
     Plots.plot!((x) -> b[1] + w[1] * x, label="After Training", lw=2)
     Plots.savefig("linear_regression.png")
@@ -34,9 +36,9 @@ end
     y = hcat([d[2] for d in data]...)
 
     x_train, y_train, x_test, y_test = split_data(x, y, 0.2)
-    model = LinearRegression(5;learning_rate=0.01,max_epochs=10000,tolerance=1e-6)
-    train!(model, x_train, y_train)
+    model = FastML.LinearRegression.Model(5;learning_rate=0.01,max_epochs=10000,tolerance=1e-6)
+    FastML.LinearRegression.train!(model, x_train, y_train)
 
-    @test 1 > r2(model, x_train, y_train) > 0.9
-    @test 1 > r2(model, x_test, y_test) > 0.9
+    @test 1 > FastML.LinearRegression.r2(model, x_train, y_train) > 0.9
+    @test 1 > FastML.LinearRegression.r2(model, x_test, y_test) > 0.9
 end
