@@ -8,9 +8,13 @@ using Plots
     x = hcat([d[1] for d in data]...)
     y = hcat([d[2] for d in data]...)
 
+    x_train, y_train, x_test, y_test = split_data(x, y, 0.2)
+
     model = LinearRegression(1;learning_rate=0.01,max_epochs=10000,tolerance=1e-6)
-    train!(model, data)
-    predicted_values = predict(model, x)
+    train!(model, x_train, y_train)
+
+    println(r2(model, x_train, y_train))
+    println(r2(model, x_test, y_test))
 
     w = weight(model)
     b = bias(model)

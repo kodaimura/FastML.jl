@@ -1,6 +1,7 @@
 using Flux
+using Statistics
 
-export LinearRegression, train!, predict, weight, bias
+export LinearRegression, train!, predict, r2, weight, bias
 
 @enum RegType None L1 L2 ElasticNet
 
@@ -127,4 +128,14 @@ end
 
 function train_model!(loss, model::Flux.Dense, data; learning_rate=0.01)
     Flux.train!(loss, model, data, Descent(learning_rate))
+end
+
+function r2(lr::LinearRegression, features, labels)
+    y = labels
+    y_pred = predict(lr, features)
+
+    ss_tot = sum((y .- mean(y)) .^ 2)
+    ss_res = sum((y .- y_pred) .^ 2)
+    
+    return 1 - ss_res / ss_tot
 end
