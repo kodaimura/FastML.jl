@@ -58,8 +58,8 @@ function bias(lrm::Model)
 end
 
 function train!(lrm::Model, data)::Tuple{Bool, Int, Float64}
-    features = hcat([d[1] for d in data]...)
-    labels = hcat([d[2] for d in data]...)
+    features = reduce(hcat, first.(data))
+    labels = reduce(hcat, last.(data))
     train!(lrm, features, labels)
 end
 

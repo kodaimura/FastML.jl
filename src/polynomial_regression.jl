@@ -58,21 +58,20 @@ function bias(prm::Model)
 end
 
 function train!(prm::Model, data)::Tuple{Bool, Int, Float64}
-    features = hcat([d[1] for d in data]...)
-    labels = hcat([d[2] for d in data]...)
-    train!(pr, features, labels)
+    x = reduce(hcat, first.(data))
+    y = reduce(hcat, last.(data))
+    train!(prm, features, labels)
 end
 
 function train!(prm::Model, features, labels)::Tuple{Bool, Int, Float64}
     features = transform_features(features, prm.input_size)
-    println(features)
     model = get_model(prm)
     loss = create_loss_function(prm)
     prev_loss = Inf
     epoch_loss = 0.0
     for epoch in 1:prm.max_epochs
         train_model!(loss, model, features, labels; learning_rate=prm.learning_rate)
-        epoch_loss = loss(model, hcat(features), labels)
+        epoch_loss = loss(model, features, labels)
 
         if abs(prev_loss - epoch_loss) < prm.tolerance
             return true, epoch, epoch_loss
@@ -126,7 +125,7 @@ end
 #end
 
 function train_model!(loss, model::Flux.Dense, features, labels; learning_rate=0.01)
-    data = [(features[i], labels[i]) for i in 1:length(labels)]
+    data = [(features[:, i], labels[i]) for i in 1:size(features, 2)]
     train_model!(loss, model, data; learning_rate=learning_rate)
 end
 
@@ -136,7 +135,7 @@ end
 
 function r2(prm::Model, features, labels)
     y = labels
-    y_pred = predict(pr, features)
+    y_pred = predict(prm, features)
 
     ss_tot = sum((y .- mean(y)) .^ 2)
     ss_res = sum((y .- y_pred) .^ 2)
@@ -145,7 +144,7 @@ function r2(prm::Model, features, labels)
 end
 
 function transform_features(features, power::Int)
-    return [[features[x] ^ i for i in 1:power] for x in 1:size(features, 2)]
+    return vcat([features .^ i for i in 1:power]...)
 end
 
 end

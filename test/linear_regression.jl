@@ -7,8 +7,8 @@ gr()
 @testset "linear_regression" begin
     f(x) = 3x + 5
     data = [([x + rand(Float32)], f(x) + rand(Float32)) for x in -3:0.1f0:3]
-    x = hcat([d[1] for d in data]...)
-    y = hcat([d[2] for d in data]...)
+    x = reduce(hcat, first.(data))
+    y = reduce(hcat, last.(data))
 
     x_train, y_train, x_test, y_test = split_data(x, y, 0.2)
     model = FastML.LinearRegression.Model(1;learning_rate=0.01,max_epochs=10000,tolerance=1e-6)
@@ -32,8 +32,8 @@ end
         yi = f(xi) + rand(Float32)
         push!(data, (xi, yi))
     end
-    x = hcat([d[1] for d in data]...)
-    y = hcat([d[2] for d in data]...)
+    x = reduce(hcat, first.(data))
+    y = reduce(hcat, last.(data))
 
     x_train, y_train, x_test, y_test = split_data(x, y, 0.2)
     model = FastML.LinearRegression.Model(5;learning_rate=0.01,max_epochs=10000,tolerance=1e-6)
