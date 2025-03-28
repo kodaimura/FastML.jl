@@ -45,9 +45,13 @@ end
 
 function predict(lrm::Model, features)
     model = get_model(lrm)
-    return model(features)
+    x = transpose(features)
+    return model(x)
 end
 
+function transpose(x::AbstractMatrix)
+    return x'
+end
 
 function weight(lrm::Model)
     return get_model(lrm).weight
@@ -57,20 +61,25 @@ function bias(lrm::Model)
     return get_model(lrm).bias
 end
 
-function train!(lrm::Model, data)::Tuple{Bool, Int, Float64}
-    features = reduce(hcat, first.(data))
-    labels = reduce(hcat, last.(data))
-    train!(lrm, features, labels)
+function train!(lrm::Model, features, labels)::Tuple{Bool, Int, Float64}
+    x = transpose(features)
+    y = transpose(labels)
+
+    # return (done, epoch, loss)
+    # done = 学習が完了したかどうか（Bool）
+    # epoch = 学習したエポック数（Int）
+    # loss = 最終的な損失（Float64）
+    return _train!(lrm, x, y)
 end
 
-function train!(lrm::Model, features, labels)::Tuple{Bool, Int, Float64}
+function _train!(lrm::Model, x, y)
     model = get_model(lrm)
     loss = create_loss_function(lrm)
     prev_loss = Inf
     epoch_loss = 0.0
     for epoch in 1:lrm.max_epochs
-        train_model!(loss, model, features, labels; learning_rate=lrm.learning_rate)
-        epoch_loss = loss(model, features, labels)
+        train_model!(loss, model, x, y; learning_rate=lrm.learning_rate)
+        epoch_loss = loss(model, x, y)
 
         if abs(prev_loss - epoch_loss) < lrm.tolerance
             return true, epoch, epoch_loss
@@ -93,38 +102,32 @@ function create_loss_function(lrm::Model)
     end
 end
 
-function loss_base(model::Flux.Dense, features, labels; lambda1=0.0, lambda2=0.0)
-    y_hat = model(features)
-    mse_loss = Flux.mse(y_hat, labels)
+function loss_base(model::Flux.Dense, x, y; lambda1=0.0, lambda2=0.0)
+    y_hat = model(x)
+    mse_loss = Flux.mse(y_hat, y)
     l1_penalty = lambda1 * sum(abs.(model.weight))
     l2_penalty = lambda2 * sum(model.weight .^ 2)
     return mse_loss + l1_penalty + l2_penalty
 end
 
-function loss_mse(model::Flux.Dense, features, labels)
-    return loss_base(model, features, labels)
+function loss_mse(model::Flux.Dense, x, y)
+    return loss_base(model, x, y)
 end
 
-function loss_lasso(model::Flux.Dense, features, labels; lambda1=0.0)
-    return loss_base(model, features, labels, lambda1=lambda1)
+function loss_lasso(model::Flux.Dense, x, y; lambda1=0.0)
+    return loss_base(model, x, y, lambda1=lambda1)
 end
 
-function loss_ridge(model::Flux.Dense, features, labels; lambda2=0.0)
-    return loss_base(model, features, labels; lambda2=lambda2)
+function loss_ridge(model::Flux.Dense, x, y; lambda2=0.0)
+    return loss_base(model, x, y; lambda2=lambda2)
 end
 
-function loss_elastic_net(model::Flux.Dense, features, labels; lambda1=0.0, lambda2=0.0)
-    return loss_base(model, features, labels; lambda1=lambda1, lambda2=lambda2)
+function loss_elastic_net(model::Flux.Dense, x, y; lambda1=0.0, lambda2=0.0)
+    return loss_base(model, x, y; lambda1=lambda1, lambda2=lambda2)
 end
 
-#function train_model!(loss, model::Flux.Dense, features, labels; learning_rate=0.01)
-#    dLdm, _, _ = gradient(loss, model, features, labels)
-#    @. model.weight = model.weight - learning_rate * dLdm.weight
-#    @. model.bias = model.bias - learning_rate * dLdm.bias
-#end
-
-function train_model!(loss, model::Flux.Dense, features, labels; learning_rate=0.01)
-    data = [(features[:, i], labels[i]) for i in 1:size(features, 2)]
+function train_model!(loss, model::Flux.Dense, x, y; learning_rate=0.01)
+    data = [(x[:, i], y[i]) for i in 1:size(x, 2)]
     train_model!(loss, model, data; learning_rate=learning_rate)
 end
 
@@ -133,7 +136,7 @@ function train_model!(loss, model::Flux.Dense, data; learning_rate=0.01)
 end
 
 function r2(lrm::Model, features, labels)
-    y = labels
+    y = transpose(labels)
     y_pred = predict(lrm, features)
 
     ss_tot = sum((y .- mean(y)) .^ 2)

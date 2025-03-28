@@ -49,6 +49,16 @@ function predict(prm::Model, features)
     return model(features)
 end
 
+function predict(lrm::Model, features)
+    model = get_model(lrm)
+    x = transpose(features)
+    return model(x)
+end
+
+function transpose(x::AbstractMatrix)
+    return x'
+end
+
 function weight(prm::Model)
     return get_model(prm).weight
 end
