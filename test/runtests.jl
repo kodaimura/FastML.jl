@@ -9,4 +9,8 @@ using FastML
     @testset "polynomial_regression.jl" begin
         include("polynomial_regression.jl")
     end
+
+    @testset "logistic_regression.jl" begin
+        include("logistic_regression.jl")
+    end
 end

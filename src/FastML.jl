@@ -2,9 +2,11 @@ module FastML
 
 include("linear_regression.jl")
 include("polynomial_regression.jl")
+include("logistic_regression.jl")
 
 using .LinearRegression
 using .PolynomialRegression
+using .LogisticRegression
 using Random
 
 export Model, train!, predict, r2, weight, bias
