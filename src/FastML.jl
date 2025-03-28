@@ -1,31 +1,49 @@
 module FastML
 
-include("linear_regression.jl")
-include("polynomial_regression.jl")
-include("logistic_regression.jl")
-
-using .LinearRegression
-using .PolynomialRegression
-using .LogisticRegression
 using Random
 
-export Model, train!, predict, r2, weight, bias
-export split_data
+export split_train_test
 
-function split_data(x::AbstractMatrix, y::AbstractMatrix, test_size::Float64)
-    n = size(x, 1)
-    indices = randperm(n)
-    test_size = round(Int, test_size * n)
-    
-    test_indices = indices[1:test_size]
-    train_indices = indices[test_size+1:end]
+@enum RegType None L1 L2 ElasticNet
 
-    x_train = x[train_indices, :]
-    y_train = y[train_indices, :]
-    x_test = x[test_indices, :]
-    y_test = y[test_indices, :]
+struct Trainer
+    reg_type::RegType
+    lambda1::Float64
+    lambda2::Float64
+    learning_rate::Float64
+    max_epochs::Int
+    tolerance::Float64
+end
 
-    return x_train, y_train, x_test, y_test
+function Trainer(
+    reg_type::RegType = None,
+    lambda1::Float64 = 0.1,
+    lambda2::Float64 = 0.1,
+    learning_rate::Float64 = 0.01,
+    max_epochs::Int = 1000,
+    tolerance::Float64 = 1e-6
+) 
+    return new(reg_type, lambda1, lambda2, learning_rate, max_epochs, tolerance)
+end
+
+
+function split_train_test(X, y; test_size=0.2, shuffle=true, seed=nothing)
+    n = size(X, 2)
+    n_test = round(Int, n * test_size)
+    n_train = n - n_test
+
+    indices = collect(1:n)
+    if shuffle
+        seed !== nothing && Random.seed!(seed)
+        shuffle!(indices)
+    end
+
+    train_idx, test_idx = indices[1:n_train], indices[n_train+1:end]
+
+    X_train, X_test = X[:, train_idx], X[:, test_idx]
+    y_train, y_test = y[:, train_idx], y[:, test_idx]
+
+    return X_train, X_test, y_train, y_test
 end
 
 end
