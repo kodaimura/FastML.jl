@@ -1,4 +1,5 @@
 using Test
+using FastML
 using Random
 
 

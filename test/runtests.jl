@@ -4,4 +4,8 @@ using Test
     @testset "utils" begin
         include("utils.jl")
     end
+
+    @testset "models" begin
+        include("models.jl")
+    end
 end
