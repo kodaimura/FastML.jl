@@ -14,11 +14,11 @@ using Statistics
         trainer = Trainer(:linear_regression)
         @show train!(model, X_train, y_train, trainer)
         
-        w = model.weight
-        b = model.bias
-        Plots.plot(vec(X), vec(y), seriestype = :scatter, label="True values", title="Model Training")
-        Plots.plot!((x) -> b[1] + w[1] * x, label="After Training", lw=2)
-        Plots.savefig("linear_regression.png")
+        #w = model.weight
+        #b = model.bias
+        #Plots.plot(vec(X), vec(y), seriestype = :scatter, label="True values", title="Model Training")
+        #Plots.plot!((x) -> b[1] + w[1] * x, label="After Training", lw=2)
+        #Plots.savefig("linear_regression.png")
     end
 
     @testset "multiple_linear_regression" begin
@@ -38,11 +38,11 @@ using Statistics
         trainer = Trainer(:polynomial_regression; learning_rate=0.0003)
         @show train!(model, X_train, y_train, trainer)
 
-        w = model.weight
-        b = model.bias
-        Plots.plot(X[1, :], vec(y), seriestype=:scatter, label="True values", title="Polynomial Regression")
-        Plots.plot!((x) -> b[1] + w[3] * x^3 + w[2] * x^2 + w[1] * x, label="Predicted values", lw=2)
-        Plots.savefig("polynomial_regression.png")
+        #w = model.weight
+        #b = model.bias
+        #Plots.plot(X[1, :], vec(y), seriestype=:scatter, label="True values", title="Polynomial Regression")
+        #Plots.plot!((x) -> b[1] + w[3] * x^3 + w[2] * x^2 + w[1] * x, label="Predicted values", lw=2)
+        #Plots.savefig("polynomial_regression.png")
     end
 
     @testset "neural_network_regression" begin

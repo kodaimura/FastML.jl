@@ -1,3 +1,6 @@
+using LinearAlgebra
+using Distributions
+
 function sample_linear_data(f::Function = x -> x; samples = 100, x_min = -3.0, x_max = 3.0)
     X = rand(Float64, samples, 1) * (x_max - x_min) .+ x_min
     y = f.(X) .+ rand(Float32, samples)
