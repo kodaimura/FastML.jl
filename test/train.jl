@@ -67,5 +67,14 @@ using Statistics
 
         accuracy(x, y) = Statistics.mean(Flux.onecold(model(x), classes) .== y)
         @show accuracy(X_test, y_test')
+
+        #x_min, x_max = minimum(X[1, :]) - 1, maximum(X[1, :]) + 1
+        #y_min, y_max = minimum(X[2, :]) - 1, maximum(X[2, :]) + 1
+        #xx = range(x_min, stop=x_max, length=100)
+        #yy = range(y_min, stop=y_max, length=100)
+        #zz = [Flux.onecold(model([x, y]), classes)[1] for x in xx, y in yy]
+        #scatter(X[1, :], X[2, :], c=y[:], marker=:circle, label="Training Data")
+        #contour!(xx, yy, zz', levels=length(classes), linewidth=2, color=:black, label="Decision Boundary")
+        #Plots.savefig("logistic_regression.png")
     end
 end
