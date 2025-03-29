@@ -1,5 +1,5 @@
 function sample_linear_data(f::Function = x -> x; samples = 100, x_min = -3.0, x_max = 3.0)
-    X = rand(Float64, samples) * (x_max - x_min) .+ x_min
+    X = rand(Float64, samples, 1) * (x_max - x_min) .+ x_min
     y = f.(X) .+ rand(Float32, samples)
     
     X = reshape(X, samples, 1)'
@@ -9,26 +9,29 @@ function sample_linear_data(f::Function = x -> x; samples = 100, x_min = -3.0, x
 end
 
 function sample_multiple_linear_data(f::Function = x -> x[1] + x[2]; samples = 100, x_min = -3.0, x_max = 3.0)
-    features = dimension(f)
+    dim = dimension(f)
 
-    X = rand(Float64, samples, features) * (x_max - x_min) .+ x_min
+    X = rand(Float64, samples, dim) * (x_max - x_min) .+ x_min
     y = [f(x) for x in eachrow(X)] .+ rand(Float32, samples)
 
-    X = reshape(X, samples, features)'
+    X = reshape(X, samples, dim)'
     y = reshape(y, samples, 1)'
     
     return X, y
 end
 
-#function sample_polynomial_data(f::Function = x -> x^2, x_range::AbstractRange{T} = -3:0.1f0:3) where T
-#    n = length(x_range)
-#    X = x_range .+ rand(Float32, n)
-#    y = f.(X) .+ rand(Float32, n)
-#
-#    X = reshape(X, n, 1)'
-#    y = reshape(y, n, 1)'
-#    return X, y
-#end
+function sample_polynomial_data(f::Function = x -> x + x^2; samples = 100, x_min = -3.0, x_max = 3.0)
+    deg = degree(f)
+
+    X = rand(Float64, samples, 1) * (x_max - x_min) .+ x_min
+    y = f.(X) .+ rand(Float32, samples) * deg
+    X_poly = [x ^ i for x in vec(X), i in 1:deg]
+
+    X_poly = reshape(X_poly, samples, deg)'
+    y = reshape(y, samples, 1)'
+
+    return X_poly, y
+end
 
 function degree(f::Function)
     x_vals = collect(0:60)
