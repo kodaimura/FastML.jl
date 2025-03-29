@@ -8,4 +8,8 @@ using Test
     @testset "models" begin
         include("models.jl")
     end
+
+    @testset "train!" begin
+        include("train.jl")
+    end
 end

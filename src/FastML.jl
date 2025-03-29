@@ -8,4 +8,7 @@ export Trainer
 include("utils.jl")
 export split_train_test
 
+include("train.jl")
+export train!
+
 end
