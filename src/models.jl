@@ -3,7 +3,7 @@
     MultipleLinearRegression
     PolynomialRegression
     LogisticRegression
-    NeuralNetwork
+    NeuralNetworkRegression
 end
 
 @enum RegType begin
@@ -18,7 +18,7 @@ const ALLOWED_MODELS = Dict(
     :multiple_linear_regression => MultipleLinearRegression,
     :polynomial_regression => PolynomialRegression,
     :logistic_regression => LogisticRegression,
-    :neural_network => NeuralNetwork
+    :neural_network_regression => NeuralNetworkRegression
 )
 
 const ALLOWED_REGULARIZATIONS = Dict(

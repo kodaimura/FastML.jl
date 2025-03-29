@@ -28,8 +28,8 @@ using FastML
         trainer = Trainer(:logistic_regression)
         @test trainer.model_type == LogisticRegression
 
-        trainer = Trainer(:neural_network)
-        @test trainer.model_type == NeuralNetwork
+        trainer = Trainer(:neural_network_regression)
+        @test trainer.model_type == NeuralNetworkRegression
 
         @test_throws AssertionError Trainer(:invalid_model, :l1)
     end

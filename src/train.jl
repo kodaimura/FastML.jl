@@ -22,6 +22,10 @@ function train_model!(loss, model, X, y; learning_rate=0.01)
 end
 
 function create_loss_function(t::Trainer)
+    if t.model_type == NeuralNetworkRegression
+        return (model, X, y) -> loss_mse(model, X, y)
+    end
+
     reg_type = t.reg_type
     if reg_type == L1
         return (model, X, y) -> loss_lasso(model, X, y, t.lambda1)
@@ -34,26 +38,26 @@ function create_loss_function(t::Trainer)
     end
 end
 
-function loss_base(model, X, y; lambda1=0.0, lambda2=0.0)
+function loss_mse(model, X, y)
     y_hat = model(X)
-    mse_loss = Flux.mse(y_hat, y)
-    l1_penalty = lambda1 * sum(abs.(model.weight))
-    l2_penalty = lambda2 * sum(model.weight .^ 2)
-    return mse_loss + l1_penalty + l2_penalty
+    return  Flux.mse(y_hat, y)
 end
 
-function loss_mse(model, X, y)
-    return loss_base(model, X, y)
+function loss_reg(model, X, y; lambda1=0.0, lambda2=0.0)
+    loss = loss_mse(model, X, y)
+    l1_penalty = lambda1 * sum(abs.(model.weight))
+    l2_penalty = lambda2 * sum(model.weight .^ 2)
+    return loss + l1_penalty + l2_penalty
 end
 
 function loss_lasso(model, X, y; lambda1=0.0)
-    return loss_base(model, X, y, lambda1=lambda1)
+    return loss_reg(model, X, y, lambda1=lambda1)
 end
 
 function loss_ridge(model, X, y; lambda2=0.0)
-    return loss_base(model, X, y; lambda2=lambda2)
+    return loss_reg(model, X, y; lambda2=lambda2)
 end
 
 function loss_elastic_net(model, X, y; lambda1=0.0, lambda2=0.0)
-    return loss_base(model, X, y; lambda1=lambda1, lambda2=lambda2)
+    return loss_reg(model, X, y; lambda1=lambda1, lambda2=lambda2)
 end
