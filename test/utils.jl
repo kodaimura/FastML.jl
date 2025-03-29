@@ -36,18 +36,3 @@ using Random
         end
     end
 end
-
-
-@testset "r2" begin
-    X, y = sample_linear_data(x -> 3x + 5)
-    X_train, y_train, X_test, y_test = split_train_test(X, y; test_size=0.2, shuffle=false)
-
-    model = Flux.Dense(1 => 1)
-    trainer = Trainer(:linear_regression)
-    train!(model, X_train, y_train, trainer)
-
-    #@show r2(model, X_train, y_train), r2(model, X_test, y_test)
-
-    @test 1 > r2(model, X_train, y_train) > 0.8
-    @test 1 > r2(model, X_test, y_test) > 0.8
-end

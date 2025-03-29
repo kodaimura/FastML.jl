@@ -1,4 +1,5 @@
 using Flux
+using Statistics
 
 function train!(model, X, y, t::Trainer)::Tuple{Bool, Int, Float64}
     loss = create_loss_function(t)
@@ -78,16 +79,28 @@ end
 
 function train!(model, X, y, classes, t::Trainer)::Tuple{Bool, Int, Float64}
     y_onehot = reshape(Flux.onehotbatch(y, classes), length(classes), length(y))
-    accuracy(x, y) = Statistics.mean(Flux.onecold(model(x), classes) .== y)
     loss = create_loss_function(t)
     epoch_accuracy = 0.0
     for epoch in 1:t.max_epochs
         train_model!(loss, model, X, y_onehot, true; learning_rate=t.learning_rate)
-        epoch_accuracy = accuracy(X, reshape(y, :, 1))
+        epoch_accuracy = accuracy(model, X, y, classes)
         if epoch_accuracy >= 0.95
-            println("Converged at epoch $epoch with accuracy $epoch_accuracy")
             return true, epoch, epoch_accuracy
         end
     end
     return false, t.max_epochs, epoch_accuracy
+end
+
+function r2(model, X, y)
+    y_pred = model(X)
+    y_mean = mean(y[:])
+
+    ss_tot = sum((y .- y_mean) .^ 2)
+    ss_res = sum((y .- y_pred) .^ 2)
+
+    return ss_tot == 0 ? 1.0 : 1 - ss_res / ss_tot
+end
+
+function accuracy(model, X, y, classes)
+    return mean(Flux.onecold(model(X), classes) .== vec(y)) 
 end

@@ -65,8 +65,7 @@ using Statistics
         trainer = Trainer(:logistic_regression; learning_rate=0.05, max_epochs=10000)
         @show train!(model, X_train, y_train, classes, trainer)
 
-        accuracy(x, y) = Statistics.mean(Flux.onecold(model(x), classes) .== y)
-        @show accuracy(X_test, y_test')
+        @show accuracy(model, X_test, y_test, classes)
 
         #x_min, x_max = minimum(X[1, :]) - 1, maximum(X[1, :]) + 1
         #y_min, y_max = minimum(X[2, :]) - 1, maximum(X[2, :]) + 1
@@ -77,4 +76,18 @@ using Statistics
         #contour!(xx, yy, zz', levels=length(classes), linewidth=2, color=:black, label="Decision Boundary")
         #Plots.savefig("logistic_regression.png")
     end
+end
+
+@testset "r2" begin
+    X, y = sample_linear_data(x -> 3x + 5)
+    X_train, y_train, X_test, y_test = split_train_test(X, y; test_size=0.2, shuffle=false)
+
+    model = Dense(1 => 1)
+    trainer = Trainer(:linear_regression)
+    train!(model, X_train, y_train, trainer)
+
+    #@show r2(model, X_train, y_train), r2(model, X_test, y_test)
+
+    @test 1 > r2(model, X_train, y_train) > 0.8
+    @test 1 > r2(model, X_test, y_test) > 0.8
 end
