@@ -1,5 +1,7 @@
 using Test
 
+include("test_common.jl")
+
 @testset "FastML.jl" begin
     @testset "utils" begin
         include("utils.jl")

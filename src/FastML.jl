@@ -6,7 +6,7 @@ export RegType, None, L1, L2, ElasticNet
 export Trainer
 
 include("utils.jl")
-export split_train_test
+export split_train_test, r2
 
 include("train.jl")
 export train!
