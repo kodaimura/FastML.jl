@@ -21,9 +21,18 @@ function train_model!(loss, model, X, y; learning_rate=0.01)
     Flux.train!(loss, model, data, Descent(learning_rate))
 end
 
+function train_model!(f_loss, model, X, y_onehot, flg::Bool; learning_rate=0.01)
+    dLdm, _, _ = gradient(f_loss, model, X, y_onehot)
+    @. model[1].weight = model[1].weight - learning_rate * dLdm[:layers][1][:weight]
+    @. model[1].bias = model[1].bias - learning_rate * dLdm[:layers][1][:bias]
+end
+
 function create_loss_function(t::Trainer)
-    if t.model_type == NeuralNetworkRegression
+    model_type = t.model_type
+    if model_type == NeuralNetworkRegression
         return (model, X, y) -> loss_mse(model, X, y)
+    elseif model_type == LogisticRegression
+        return (model, X, y_onehot) -> loss_logitcrossentropy(model, X, y_onehot)
     end
 
     reg_type = t.reg_type
@@ -60,4 +69,25 @@ end
 
 function loss_elastic_net(model, X, y; lambda1=0.0, lambda2=0.0)
     return loss_reg(model, X, y; lambda1=lambda1, lambda2=lambda2)
+end
+
+function loss_logitcrossentropy(model, X, y_onehot)
+    y_hat = model(X)
+    return Flux.logitcrossentropy(y_hat, y_onehot)
+end
+
+function train!(model, X, y, classes, t::Trainer)::Tuple{Bool, Int, Float64}
+    y_onehot = reshape(Flux.onehotbatch(y, classes), length(classes), length(y))
+    accuracy(x, y) = Statistics.mean(Flux.onecold(model(x), classes) .== y)
+    loss = create_loss_function(t)
+    epoch_accuracy = 0.0
+    for epoch in 1:t.max_epochs
+        train_model!(loss, model, X, y_onehot, true; learning_rate=t.learning_rate)
+        epoch_accuracy = accuracy(X, reshape(y, :, 1))
+        if epoch_accuracy >= 0.95
+            println("Converged at epoch $epoch with accuracy $epoch_accuracy")
+            return true, epoch, epoch_accuracy
+        end
+    end
+    return false, t.max_epochs, epoch_accuracy
 end

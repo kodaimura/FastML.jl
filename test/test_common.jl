@@ -61,3 +61,32 @@ function dimension(f::Function)
     end
     error("Dimension > 60 not supported")
 end
+
+
+function sample_classification_data(classes::Int = 2, features::Int = 2; samples = 100, x_min = -3.0, x_max = 3.0)
+    centers = [(rand(Float32, features) .* (x_max - x_min) .+ x_min) for _ in 1:classes]
+    
+    X = []
+    y = []
+    for class in 1:classes
+        mean = centers[class]  # クラスごとの中心
+        cov = I(features) * 0.2  # n×n の共分散行列（各次元の分散を0.5に）
+        dist = MvNormal(mean, cov)  # n 次元正規分布
+        
+        num_samples = samples ÷ classes
+        if class == classes
+            num_samples += samples % classes
+        end
+
+        X_class = rand(dist, num_samples)
+        y_class = fill(class, num_samples)
+        
+        append!(X, eachcol(X_class))
+        append!(y, y_class)
+    end
+    
+    X = hcat(X...)
+    y = reshape(y, 1, samples)
+
+    return X, y
+end

@@ -3,6 +3,7 @@ using Flux
 using FastML
 using Plots
 using Random
+using Statistics
 
 @testset "train!" begin
     @testset "linear_regression" begin
@@ -26,7 +27,6 @@ using Random
         
         model = Dense(5 => 1)
         trainer = Trainer(:multiple_linear_regression)
-        train!(model, X_train, y_train, trainer)
         @show train!(model, X_train, y_train, trainer)
     end
 
@@ -36,7 +36,6 @@ using Random
         
         model = Dense(3 => 1)
         trainer = Trainer(:polynomial_regression; learning_rate=0.0003)
-        train!(model, X_train, y_train, trainer)
         @show train!(model, X_train, y_train, trainer)
 
         w = model.weight
@@ -51,8 +50,22 @@ using Random
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Chain(Dense(5 => 20, σ), Dense(20 => 1))
-        trainer = Trainer(:neural_network_regression; learning_rate=0.001, max_epochs=2000)
-        train!(model, X_train, y_train, trainer)
+        trainer = Trainer(:neural_network_regression; learning_rate=0.01, max_epochs=1000)
         @show train!(model, X_train, y_train, trainer)
+    end
+
+    @testset "logistic_regression" begin
+        classes = [1, 2, 3];
+        X, y = sample_classification_data(3, 2; samples=100, x_min=-10, x_max=10)
+        #scatter(X[1, :], X[2, :], c=y[:], legend=false, markersize=3)
+        #Plots.savefig("classes.png")
+
+        X_train, y_train, X_test, y_test = split_train_test(X, y; shuffle=true)
+        model = Chain(Dense(2 => 3), softmax)
+        trainer = Trainer(:logistic_regression; learning_rate=0.05, max_epochs=10000)
+        @show train!(model, X_train, y_train, classes, trainer)
+
+        accuracy(x, y) = Statistics.mean(Flux.onecold(model(x), classes) .== y)
+        @show accuracy(X_test, y_test')
     end
 end
