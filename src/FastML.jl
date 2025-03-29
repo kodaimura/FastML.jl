@@ -1,7 +1,7 @@
 module FastML
 
 include("models.jl")
-export ModelType, LinearRegression, PolynomialRegression, LogisticRegression, NeuralNetwork
+export ModelType, LinearRegression, MultipleLinearRegression, PolynomialRegression, LogisticRegression, NeuralNetwork
 export RegType, None, L1, L2, ElasticNet
 export Trainer
 

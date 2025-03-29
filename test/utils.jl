@@ -1,5 +1,6 @@
 using Test
 using FastML
+using Flux
 using Random
 
 

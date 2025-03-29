@@ -1,5 +1,6 @@
 @enum ModelType begin
     LinearRegression
+    MultipleLinearRegression
     PolynomialRegression
     LogisticRegression
     NeuralNetwork
@@ -14,6 +15,7 @@ end
 
 const ALLOWED_MODELS = Dict(
     :linear_regression => LinearRegression,
+    :multiple_linear_regression => MultipleLinearRegression,
     :polynomial_regression => PolynomialRegression,
     :logistic_regression => LogisticRegression,
     :neural_network => NeuralNetwork

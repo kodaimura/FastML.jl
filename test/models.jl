@@ -19,6 +19,9 @@ using FastML
         trainer = Trainer(:linear_regression)
         @test trainer.model_type == LinearRegression
 
+        trainer = Trainer(:multiple_linear_regression)
+        @test trainer.model_type == MultipleLinearRegression
+
         trainer = Trainer(:polynomial_regression)
         @test trainer.model_type == PolynomialRegression
 
