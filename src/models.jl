@@ -1,8 +1,20 @@
+# ===================== PUBLIC ENUMERATIONS ===================== #
+# These enumerations are publicly available and define key model configurations.
+
+""" 
+Defines the type of trainer:  
+- `Regression`: For regression models  
+- `Classification`: For classification models  
+"""
 @enum TrainerType begin
     Regression
     Classification
 end
 
+""" 
+Defines the type of model that can be used.  
+Includes regression models, logistic regression, and neural networks.  
+"""
 @enum ModelType begin
     Linear
     MultipleLinear
@@ -13,6 +25,13 @@ end
     SoftmaxNeuralNetwork
 end
 
+""" 
+Defines the type of regularization used in training:  
+- `None`: No regularization  
+- `L1`: Lasso regularization  
+- `L2`: Ridge regularization  
+- `ElasticNet`: Combination of L1 and L2  
+"""
 @enum RegType begin
     None
     L1
@@ -20,30 +39,15 @@ end
     ElasticNet
 end
 
-const ALLOWED_MODELS = Dict(
-    :regression => Dict(
-        :linear => Linear,
-        :multiple_linear => MultipleLinear,
-        :polynomial => Polynomial,
-        :neural_network => NeuralNetwork,
-    ),
-    :binary_classification => Dict(
-        :logistic => BinaryLogistic,
-    ),
-    :softmax_classification => Dict(
-        :logistic => SoftmaxLogistic,
-        :neural_network => SoftmaxNeuralNetwork,
-    ),
-)
+# ===================== PUBLIC TRAINER STRUCTS ===================== #
+# These trainer structures are externally exposed and used for training models.
 
-const ALLOWED_REGULARIZATIONS = Dict(
-    :none => None,
-    :l1 => L1,
-    :l2 => L2,
-    :elastic_net => ElasticNet
-)
+""" 
+Trainer for regression models.  
 
-""" 回帰モデル用のトレーナー """
+Supports different regression models (`Linear`, `MultipleLinear`, `Polynomial`, `NeuralNetwork`)  
+and allows various types of regularization.
+"""
 struct RegressorTrainer
     trainer_type::TrainerType
     model_type::ModelType
@@ -73,7 +77,11 @@ struct RegressorTrainer
     end
 end
 
-""" バイナリ分類（ロジスティック回帰など）用のトレーナー """
+""" 
+Trainer for binary classification models (e.g., logistic regression).  
+
+Supports `BinaryLogistic` models with configurable regularization.
+"""
 struct BinaryClassifierTrainer
     trainer_type::TrainerType
     model_type::ModelType
@@ -103,7 +111,11 @@ struct BinaryClassifierTrainer
     end
 end
 
-""" 多クラス分類（Softmax, NN分類）用のトレーナー """
+""" 
+Trainer for multi-class classification models (e.g., softmax regression, neural networks).  
+
+Supports `SoftmaxLogistic` and `SoftmaxNeuralNetwork` models with different regularization techniques.
+"""
 struct SoftmaxClassifierTrainer
     trainer_type::TrainerType
     model_type::ModelType
@@ -133,12 +145,46 @@ struct SoftmaxClassifierTrainer
     end
 end
 
+# ===================== INTERNAL FUNCTIONS ===================== #
+# These functions are used internally for validation.
+
+""" 
+Validates if the given model type is allowed for the specified task.  
+Throws an assertion error if the model type is invalid.
+"""
 function _validate_model_type(input::Symbol, allowed_models::Dict{Symbol, ModelType})
     @assert input in keys(allowed_models) 
             "Invalid model_type: $input. Allowed: $(keys(allowed_models))"
 end
 
+""" 
+Validates if the given regularization type is allowed.  
+Throws an assertion error if the regularization type is invalid.
+"""
 function _validate_reg_type(input::Symbol, allowed_regs::Dict{Symbol, RegType})
     @assert input in keys(allowed_regs) 
             "Invalid reg_type: $input. Allowed: $(keys(allowed_regs))"
 end
+
+const ALLOWED_MODELS = Dict(
+    :regression => Dict(
+        :linear => Linear,
+        :multiple_linear => MultipleLinear,
+        :polynomial => Polynomial,
+        :neural_network => NeuralNetwork,
+    ),
+    :binary_classification => Dict(
+        :logistic => BinaryLogistic,
+    ),
+    :softmax_classification => Dict(
+        :logistic => SoftmaxLogistic,
+        :neural_network => SoftmaxNeuralNetwork,
+    ),
+)
+
+const ALLOWED_REGULARIZATIONS = Dict(
+    :none => None,
+    :l1 => L1,
+    :l2 => L2,
+    :elastic_net => ElasticNet
+)

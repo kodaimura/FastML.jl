@@ -2,6 +2,21 @@ using Random
 using LinearAlgebra
 using Distributions
 
+# ===================== PUBLIC FUNCTIONS ===================== #
+# These functions are publicly available for data generation and splitting.
+
+""" 
+Splits dataset `(X, y)` into training and test sets.
+
+# Arguments
+- `X, y`: Feature matrix and target labels.
+- `test_size`: Proportion of samples used for testing (default: `0.2`).
+- `shuffle`: Whether to shuffle before splitting (default: `true`).
+- `seed`: Random seed for reproducibility (default: `nothing`).
+
+# Returns
+- `(X_train, y_train, X_test, y_test)`: Training and test datasets.
+"""
 function split_train_test(X, y; test_size=0.2, shuffle=true, seed=nothing)
     n = size(X, 2)
     n_test = round(Int, n * test_size)
@@ -21,6 +36,17 @@ function split_train_test(X, y; test_size=0.2, shuffle=true, seed=nothing)
     return X_train, y_train, X_test, y_test
 end
 
+""" 
+Generates a simple linear regression dataset with optional noise.
+
+# Arguments
+- `f`: Function mapping `x -> y` (default: `x -> x`).
+- `n_samples`: Number of samples (default: `100`).
+- `x_min, x_max`: Range of `x` values (default: `-3` to `3`).
+
+# Returns
+- `(X, y)`: Feature matrix and target values.
+"""
 function sample_linear_regression_data(f::Function = x -> x; n_samples = 100, x_min = -3, x_max = 3)
     X = rand(Float32, n_samples, 1) * (x_max - x_min) .+ x_min
     y = f.(X) .+ rand(Float32, n_samples)
@@ -31,6 +57,17 @@ function sample_linear_regression_data(f::Function = x -> x; n_samples = 100, x_
     return X, y
 end
 
+""" 
+Generates a multiple linear regression dataset with optional noise.
+
+# Arguments
+- `f`: Function mapping `x -> y` (default: `x[1] + x[2]`).
+- `n_samples`: Number of samples (default: `100`).
+- `x_min, x_max`: Range of `x` values (default: `-3` to `3`).
+
+# Returns
+- `(X, y)`: Feature matrix and target values.
+"""
 function sample_multiple_linear_regression_data(f::Function = x -> x[1] + x[2]; n_samples = 100, x_min = -3, x_max = 3)
     dim = dimension(f)
 
@@ -43,6 +80,17 @@ function sample_multiple_linear_regression_data(f::Function = x -> x[1] + x[2]; 
     return X, y
 end
 
+""" 
+Generates a polynomial regression dataset with optional noise.
+
+# Arguments
+- `f`: Function mapping `x -> y` (default: `x + x^2`).
+- `n_samples`: Number of samples (default: `100`).
+- `x_min, x_max`: Range of `x` values (default: `-3` to `3`).
+
+# Returns
+- `(X_poly, y)`: Feature matrix with polynomial terms and target values.
+"""
 function sample_polynomial_regression_data(f::Function = x -> x + x^2; n_samples = 100, x_min = -3, x_max = 3)
     deg = degree(f)
 
@@ -56,6 +104,18 @@ function sample_polynomial_regression_data(f::Function = x -> x + x^2; n_samples
     return X_poly, y
 end
 
+""" 
+Generates a classification dataset with Gaussian-distributed clusters.
+
+# Arguments
+- `classes`: List of class labels (default: `[0,1]`).
+- `n_features`: Number of features per sample (default: `1`).
+- `n_samples`: Total number of samples (default: `100`).
+- `x_min, x_max`: Range of feature values (default: `-3` to `3`).
+
+# Returns
+- `(X, y)`: Feature matrix and class labels.
+"""
 function sample_classification_data(classes = [0,1], n_features = 1; n_samples = 100, x_min = -3, x_max = 3)
     n_classes = length(classes)
     centers = [(rand(Float32, n_features) .* (x_max - x_min) .+ x_min) for _ in 1:n_classes]
@@ -85,10 +145,33 @@ function sample_classification_data(classes = [0,1], n_features = 1; n_samples =
     return X, y
 end
 
+""" 
+Generates a binary classification dataset.
+
+# Arguments
+- `n_features`: Number of features per sample (default: `1`).
+- `n_samples`: Total number of samples (default: `100`).
+- `x_min, x_max`: Range of feature values (default: `-3` to `3`).
+
+# Returns
+- `(X, y)`: Feature matrix and binary labels (`0` or `1`).
+"""
 function sample_binary_classification_data(n_features = 1; n_samples = 100, x_min = -3, x_max = 3)
     sample_classification_data([0,1], n_features; n_samples=n_samples, x_min=x_min, x_max=x_max)
 end
 
+# ===================== INTERNAL FUNCTIONS ===================== #
+# These functions are used internally for function analysis and are NOT publicly exposed.
+
+""" 
+Determines the polynomial degree of a function by checking its finite differences.
+
+# Arguments
+- `f`: A function to analyze.
+
+# Returns
+- `degree`: The polynomial degree of the function.
+"""
 function degree(f::Function)
     x_vals = collect(0:60)
     y_vals = f.(x_vals)
@@ -106,6 +189,15 @@ function degree(f::Function)
     error("Degree > 60 not supported")
 end
 
+""" 
+Determines the number of input dimensions of a function.
+
+# Arguments
+- `f`: A function to analyze.
+
+# Returns
+- `dimension`: The number of input dimensions required by `f`.
+"""
 function dimension(f::Function)
     for dimension in 1:60
         try
