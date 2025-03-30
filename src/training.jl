@@ -6,8 +6,7 @@ function train!(trainer::RegressorTrainer, model, X, y)::Tuple{Bool, Int, Float6
 end
 
 function train!(trainer::BinaryClassifierTrainer, model, X, y, classes)::Tuple{Bool, Int, Float64}
-    y_onehot = reshape(Flux.onehotbatch(y, classes), length(classes), length(y))
-    _train!(trainer, model, X, y_onehot, build_loss(trainer, loss_binarycrossentropy))
+    _train!(trainer, model, X, y, build_loss(trainer, loss_binarycrossentropy))
 end
 
 function train!(trainer::SoftmaxClassifierTrainer, model, X, y, classes)::Tuple{Bool, Int, Float64}
@@ -83,4 +82,9 @@ end
 
 function accuracy(model, X, y, classes)
     return mean(Flux.onecold(model(X), classes) .== vec(y)) 
+end
+
+function accuracy(model, X, y)
+    y_pred = vec(model(X)) .> 0.5
+    return mean(Int.(y_pred) .== vec(y))
 end
