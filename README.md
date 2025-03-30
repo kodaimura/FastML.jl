@@ -2,17 +2,17 @@
 
 [![Build Status](https://github.com/kodaimura/FastML.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/kodaimura/FastML.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-FastML は、Flux.jl のモデルをより手軽に学習できるようにしたライブラリです。
+FastML は、Flux.jl のモデルをより手軽に学習できるようにしたライブラリです。  
 線形回帰、ロジスティック回帰、ニューラルネットワーク等の一般的な機械学習を簡潔に実装できます。
 
 | 対応手法　　　　　　　   | 説明                                      | FastML Trainer                 |
 |----------------------|------------------------------------------|--------------------------------|
 | 線形回帰（単回帰）     | 直線でデータを近似する回帰手法        | `RegressorTrainer(:linear)` |
 | 線形回帰（重回帰）     | 平面でデータを近似する回帰手法        | `RegressorTrainer(:multiple_linear)` |
-| 多項式回帰            | 特徴量を多項式にして非線形の関係を学習 | `RegressorTrainer(:polynomial)` |
+| 多項式回帰            | 曲線でデータを近似する回帰手法        | `RegressorTrainer(:polynomial)` |
 | ニューラルネットワーク  | 非線形関係にも対応できる回帰手法   | `RegressorTrainer(:neural_network)` |
-| 二項ロジスティック回帰   | 2クラスの分類手法                 | `BinaryClassifierTrainer(:logistic)` |
-| 多項ロジスティック回帰   | 3クラス以上の分類手法              | `SoftmaxClassifierTrainer(:logistic)` |
+| ロジスティック回帰（二項） | 2クラスの分類手法                 | `BinaryClassifierTrainer(:logistic)` |
+| ロジスティック回帰（多項） | 3クラス以上の分類手法              | `SoftmaxClassifierTrainer(:logistic)` |
 | ニューラルネットワーク    | 非線形境界にも対応できる分類手法 | `SoftmaxClassifierTrainer(:neural_network)` |
 
 ## インストール
