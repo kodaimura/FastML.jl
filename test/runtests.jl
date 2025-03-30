@@ -10,6 +10,6 @@ using Test
     end
 
     @testset "train!" begin
-        include("train.jl")
+        include("training.jl")
     end
 end

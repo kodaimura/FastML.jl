@@ -23,7 +23,6 @@ export RegType,
        L1, 
        L2, 
        ElasticNet
-       
 
 include("utils.jl")
 export split_train_test,
@@ -32,7 +31,7 @@ export split_train_test,
        sample_polynomial_regression_data, 
        sample_classification_data
 
-include("train.jl")
+include("training.jl")
 export train!, r2, accuracy
 
 end
