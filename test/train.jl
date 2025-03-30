@@ -7,7 +7,7 @@ using Statistics
 
 @testset "train!" begin
     @testset "linear_regression" begin
-        X, y = sample_linear_data(x -> 3x + 5)
+        X, y = sample_linear_regression_data(x -> 3x + 5)
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Dense(1 => 1)
@@ -22,7 +22,7 @@ using Statistics
     end
 
     @testset "multiple_linear_regression" begin
-        X, y = sample_multiple_linear_data(x -> 3x[1] + 2x[2] - x[3] + 4x[4] - 2x[5] + 1)
+        X, y = sample_multiple_linear_regression_data(x -> 3x[1] + 2x[2] - x[3] + 4x[4] - 2x[5] + 1)
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Dense(5 => 1)
@@ -31,7 +31,7 @@ using Statistics
     end
 
     @testset "polynomial_regression" begin
-        X, y = sample_polynomial_data(x -> 2 + 3x + 5x^2 - 3x^3)
+        X, y = sample_polynomial_regression_data(x -> 2 + 3x + 5x^2 - 3x^3)
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Dense(3 => 1)
@@ -46,7 +46,7 @@ using Statistics
     end
 
     @testset "neural_network_regression" begin
-        X, y = sample_multiple_linear_data(x -> 3x[1] + 2x[2] - x[3] + 4x[4] - 2x[5] + 1)
+        X, y = sample_multiple_linear_regression_data(x -> 3x[1] + 2x[2] - x[3] + 4x[4] - 2x[5] + 1)
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Chain(Dense(5 => 20, σ), Dense(20 => 1))
@@ -79,7 +79,7 @@ using Statistics
 end
 
 @testset "r2" begin
-    X, y = sample_linear_data(x -> 3x + 5)
+    X, y = sample_linear_regression_data(x -> 3x + 5)
     X_train, y_train, X_test, y_test = split_train_test(X, y; test_size=0.2, shuffle=false)
 
     model = Dense(1 => 1)
