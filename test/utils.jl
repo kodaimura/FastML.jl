@@ -1,7 +1,7 @@
 @testset "split_train_test" begin
     X = collect(reshape(1:20, 5, 4))
     y = reshape([0, 1, 0, 1], 1, 4)
-    X_train, y_train, X_test, y_test = split_train_test(X, y; test_size=0.5, shuffle=false)
+    X_train, y_train, X_test, y_test = split_train_test(X, y; test_size = 0.5, shuffle = false)
 
     @testset "Training Data Size" begin
         @test size(X_train, 2) == 2
@@ -19,8 +19,10 @@
     end
 
     @testset "Shuffle Behavior Verification" begin
-        X_train_s, y_train_s, X_test_s, y_test_s = split_train_test(X, y; test_size=0.5, shuffle=true, seed=42)
-        X_train_s2, y_train_s2, X_test_s2, y_test_s2 = split_train_test(X, y; test_size=0.5, shuffle=true, seed=42)
+        X_train_s, y_train_s, X_test_s, y_test_s =
+            split_train_test(X, y; test_size = 0.5, shuffle = true, seed = 42)
+        X_train_s2, y_train_s2, X_test_s2, y_test_s2 =
+            split_train_test(X, y; test_size = 0.5, shuffle = true, seed = 42)
 
         @testset "Reproducibility with Fixed Seed" begin
             @test X_train_s == X_train_s2
@@ -55,7 +57,7 @@ end
     end
 
     @testset "Custom Parameters: x -> 3x + 5, n_samples=200, x_min=-2, x_max=2" begin
-        X, y = sample_linear_regression_data(x -> 3x + 5; n_samples = 200, x_min=-2, x_max=2)
+        X, y = sample_linear_regression_data(x -> 3x + 5; n_samples = 200, x_min = -2, x_max = 2)
         @test size(X, 1) == 1
         @test size(X, 2) == 200
         @test size(y, 1) == 1
@@ -71,7 +73,7 @@ end
         @test size(X, 2) == 1
         @test size(y, 1) == 1
         @test size(y, 2) == 1
-    end 
+    end
 end
 
 @testset "sample_multiple_linear_regression_data" begin
@@ -98,7 +100,12 @@ end
     end
 
     @testset "Custom Parameters: x -> 3x[1] + 2x[2] - x[3] + 1, n_samples=200, x_min=-2, x_max=2" begin
-        X, y = sample_multiple_linear_regression_data(x -> 3x[1] + 2x[2] - x[3] + 1; n_samples = 200, x_min=-2, x_max=2)
+        X, y = sample_multiple_linear_regression_data(
+            x -> 3x[1] + 2x[2] - x[3] + 1;
+            n_samples = 200,
+            x_min = -2,
+            x_max = 2,
+        )
         @test size(X, 1) == 3
         @test size(X, 2) == 200
         @test size(y, 1) == 1
@@ -114,7 +121,7 @@ end
         @test size(X, 2) == 1
         @test size(y, 1) == 1
         @test size(y, 2) == 1
-    end 
+    end
 end
 
 @testset "sample_polynomial_regression_data" begin
@@ -124,7 +131,7 @@ end
         @test size(X, 2) == 100
         @test size(y, 1) == 1
         @test size(y, 2) == 100
-        
+
         @test all(x -> -4 ≤ x ≤ 4, X[1, :])
         @test all(x -> 0 ≤ x ≤ 16, X[2, :])
         @test all(y -> -4 ≤ y ≤ 20, vec(y))
@@ -143,7 +150,12 @@ end
     end
 
     @testset "Custom Parameters: x -> 2 + 3x + 5x^2 - 3x^3, n_samples=200, x_min=-2, x_max=2" begin
-        X, y = sample_polynomial_regression_data(x -> 2 + 3x + 5x^2 - 3x^3; n_samples = 200, x_min=-2, x_max=2)
+        X, y = sample_polynomial_regression_data(
+            x -> 2 + 3x + 5x^2 - 3x^3;
+            n_samples = 200,
+            x_min = -2,
+            x_max = 2,
+        )
         @test size(X, 1) == 3
         @test size(X, 2) == 200
         @test size(y, 1) == 1
@@ -156,7 +168,7 @@ end
         @test size(X, 2) == 1
         @test size(y, 1) == 1
         @test size(y, 2) == 1
-    end 
+    end
 end
 
 @testset "sample_classification_data" begin
@@ -172,7 +184,7 @@ end
     end
 
     @testset "Multiple Classes: classes=[1,2,3], features=2" begin
-        X, y = sample_classification_data([1,2,3], 2)
+        X, y = sample_classification_data([1, 2, 3], 2)
         @test size(X, 1) == 2
         @test size(X, 2) == 100
         @test size(y, 1) == 1
@@ -183,7 +195,8 @@ end
     end
 
     @testset "Expanded Parameters: classes=[2,4,6,8,10], features=3, n_samples=200" begin
-        X, y = sample_classification_data([2,4,6,8,10], 3; n_samples = 200, x_min=-2, x_max=2)
+        X, y =
+            sample_classification_data([2, 4, 6, 8, 10], 3; n_samples = 200, x_min = -2, x_max = 2)
         @test size(X, 1) == 3
         @test size(X, 2) == 200
         @test size(y, 1) == 1
@@ -199,7 +212,7 @@ end
         @test size(X, 2) == 1
         @test size(y, 1) == 1
         @test size(y, 2) == 1
-    end 
+    end
 end
 
 @testset "sample_binary_classification_data" begin
