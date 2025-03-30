@@ -145,8 +145,8 @@ function sample_classification_data(
     y = []
     for i in 1:n_classes
         mean = centers[i]
-        cov = I(n_features) * 0.4
-        dist = MvNormal(mean, cov)
+        cov = LinearAlgebra.I(n_features) * 0.4
+        dist = Distributions.MvNormal(mean, cov)
 
         n = n_samples ÷ n_classes
         if i == n_classes
