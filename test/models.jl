@@ -5,6 +5,7 @@ using FastML
 
     @testset "デフォルト" begin
         trainer = RegressorTrainer(:linear)
+        @test trainer.trainer_type == Regression
         @test trainer.model_type == Linear
         @test trainer.reg_type == None
         @test trainer.lambda1 == 0.0
@@ -16,6 +17,7 @@ using FastML
 
     @testset "カスタム" begin
         trainer = RegressorTrainer(:linear, :l1; lambda1=0.1, lambda2=0.2, learning_rate=0.05, max_epochs=500, tolerance=1e-5)
+        @test trainer.trainer_type == Regression
         @test trainer.model_type == Linear
         @test trainer.reg_type == L1
         @test trainer.lambda1 == 0.1
@@ -62,6 +64,7 @@ end
 
     @testset "デフォルト" begin
         trainer = BinaryClassifierTrainer(:logistic)
+        @test trainer.trainer_type == Classification
         @test trainer.model_type == BinaryLogistic
         @test trainer.reg_type == None
         @test trainer.lambda1 == 0.0
@@ -73,6 +76,7 @@ end
 
     @testset "カスタム" begin
         trainer = BinaryClassifierTrainer(:logistic, :l1; lambda1=0.1, lambda2=0.2, learning_rate=0.05, max_epochs=500, tolerance=1e-5)
+        @test trainer.trainer_type == Classification
         @test trainer.model_type == BinaryLogistic
         @test trainer.reg_type == L1
         @test trainer.lambda1 == 0.1
@@ -108,6 +112,7 @@ end
 @testset "SoftmaxClassifierTrainer" begin
     @testset "デフォルト" begin
         trainer = SoftmaxClassifierTrainer(:logistic)
+        @test trainer.trainer_type == Classification
         @test trainer.model_type == SoftmaxLogistic
         @test trainer.reg_type == None
         @test trainer.lambda1 == 0.0
@@ -119,6 +124,7 @@ end
 
     @testset "カスタム" begin
         trainer = SoftmaxClassifierTrainer(:logistic, :l1; lambda1=0.1, lambda2=0.2, learning_rate=0.05, max_epochs=500, tolerance=1e-5)
+        @test trainer.trainer_type == Classification
         @test trainer.model_type == SoftmaxLogistic
         @test trainer.reg_type == L1
         @test trainer.lambda1 == 0.1

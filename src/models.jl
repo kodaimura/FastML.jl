@@ -1,15 +1,14 @@
-@enum RegressionType begin
+@enum TrainerType begin
+    Regression
+    Classification
+end
+
+@enum ModelType begin
     Linear
     MultipleLinear
     Polynomial
     NeuralNetwork
-end
-
-@enum BinaryClassificationType begin
     BinaryLogistic
-end
-
-@enum SoftmaxClassificationType begin
     SoftmaxLogistic
     SoftmaxNeuralNetwork
 end
@@ -21,20 +20,20 @@ end
     ElasticNet
 end
 
-const ALLOWED_REGRESSION_MODELS = Dict(
-    :linear => Linear,
-    :multiple_linear => MultipleLinear,
-    :polynomial => Polynomial,
-    :neural_network => NeuralNetwork
-)
-
-const ALLOWED_BINARY_CLASSIFICATION_MODELS = Dict(
-    :logistic => BinaryLogistic
-)
-
-const ALLOWED_SOFTMAX_CLASSIFICATION_MODELS = Dict(
-    :logistic => SoftmaxLogistic,
-    :neural_network => SoftmaxNeuralNetwork
+const ALLOWED_MODELS = Dict(
+    :regression => Dict(
+        :linear => Linear,
+        :multiple_linear => MultipleLinear,
+        :polynomial => Polynomial,
+        :neural_network => NeuralNetwork,
+    ),
+    :binary_classification => Dict(
+        :logistic => BinaryLogistic,
+    ),
+    :softmax_classification => Dict(
+        :logistic => SoftmaxLogistic,
+        :neural_network => SoftmaxNeuralNetwork,
+    ),
 )
 
 const ALLOWED_REGULARIZATIONS = Dict(
@@ -46,7 +45,8 @@ const ALLOWED_REGULARIZATIONS = Dict(
 
 """ 回帰モデル用のトレーナー """
 struct RegressorTrainer
-    model_type::RegressionType
+    trainer_type::TrainerType
+    model_type::ModelType
     reg_type::RegType
     lambda1::Float64
     lambda2::Float64
@@ -61,11 +61,12 @@ struct RegressorTrainer
         max_epochs=1000, 
         tolerance=1e-6
     )
-        @assert model_type in keys(ALLOWED_REGRESSION_MODELS) "Invalid model_type: $model_type. Allowed: $(keys(ALLOWED_REGRESSION_MODELS))"
-        @assert reg_type in keys(ALLOWED_REGULARIZATIONS) "Invalid reg_type: $reg_type. Allowed: $(keys(ALLOWED_REGULARIZATIONS))"
+        _validate_model_type(model_type, ALLOWED_MODELS[:regression])
+        _validate_reg_type(reg_type, ALLOWED_REGULARIZATIONS)
 
         return new(
-            ALLOWED_REGRESSION_MODELS[model_type],
+            Regression,
+            ALLOWED_MODELS[:regression][model_type],
             ALLOWED_REGULARIZATIONS[reg_type], 
             lambda1, lambda2, learning_rate, max_epochs, tolerance
         )
@@ -74,7 +75,8 @@ end
 
 """ バイナリ分類（ロジスティック回帰など）用のトレーナー """
 struct BinaryClassifierTrainer
-    model_type::BinaryClassificationType
+    trainer_type::TrainerType
+    model_type::ModelType
     reg_type::RegType
     lambda1::Float64
     lambda2::Float64
@@ -89,11 +91,12 @@ struct BinaryClassifierTrainer
         max_epochs=1000, 
         tolerance=1e-6
     )
-        @assert model_type in keys(ALLOWED_BINARY_CLASSIFICATION_MODELS) "Invalid model_type: $model_type. Allowed: $(keys(ALLOWED_BINARY_CLASSIFICATION_MODELS))"
-        @assert reg_type in keys(ALLOWED_REGULARIZATIONS) "Invalid reg_type: $reg_type. Allowed: $(keys(ALLOWED_REGULARIZATIONS))"
+        _validate_model_type(model_type, ALLOWED_MODELS[:binary_classification])
+        _validate_reg_type(reg_type, ALLOWED_REGULARIZATIONS)
 
         return new(
-            ALLOWED_BINARY_CLASSIFICATION_MODELS[model_type],
+            Classification,
+            ALLOWED_MODELS[:binary_classification][model_type],
             ALLOWED_REGULARIZATIONS[reg_type], 
             lambda1, lambda2, learning_rate, max_epochs, tolerance
         )
@@ -102,7 +105,8 @@ end
 
 """ 多クラス分類（Softmax, NN分類）用のトレーナー """
 struct SoftmaxClassifierTrainer
-    model_type::SoftmaxClassificationType
+    trainer_type::TrainerType
+    model_type::ModelType
     reg_type::RegType
     lambda1::Float64
     lambda2::Float64
@@ -117,13 +121,24 @@ struct SoftmaxClassifierTrainer
         max_epochs=1000, 
         tolerance=1e-6
     )
-        @assert model_type in keys(ALLOWED_SOFTMAX_CLASSIFICATION_MODELS) "Invalid model_type: $model_type. Allowed: $(keys(ALLOWED_SOFTMAX_CLASSIFICATION_MODELS))"
-        @assert reg_type in keys(ALLOWED_REGULARIZATIONS) "Invalid reg_type: $reg_type. Allowed: $(keys(ALLOWED_REGULARIZATIONS))"
+        _validate_model_type(model_type, ALLOWED_MODELS[:softmax_classification])
+        _validate_reg_type(reg_type, ALLOWED_REGULARIZATIONS)
 
         return new(
-            ALLOWED_SOFTMAX_CLASSIFICATION_MODELS[model_type],
+            Classification,
+            ALLOWED_MODELS[:softmax_classification][model_type],
             ALLOWED_REGULARIZATIONS[reg_type], 
             lambda1, lambda2, learning_rate, max_epochs, tolerance
         )
     end
+end
+
+function _validate_model_type(input::Symbol, allowed_models::Dict{Symbol, ModelType})
+    @assert input in keys(allowed_models) 
+            "Invalid model_type: $input. Allowed: $(keys(allowed_models))"
+end
+
+function _validate_reg_type(input::Symbol, allowed_regs::Dict{Symbol, RegType})
+    @assert input in keys(allowed_regs) 
+            "Invalid reg_type: $input. Allowed: $(keys(allowed_regs))"
 end

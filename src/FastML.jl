@@ -3,11 +3,26 @@ module FastML
 include("models.jl")
 export RegressorTrainer,
        BinaryClassifierTrainer,
-       SoftmaxClassifierTrainer,
-       RegressionType, Linear, MultipleLinear, Polynomial, NeuralNetwork,
-       BinaryClassificationType, BinaryLogistic,
-       SoftmaxClassificationType, SoftmaxLogistic, SoftmaxNeuralNetwork,
-       RegType, None, L1, L2, ElasticNet
+       SoftmaxClassifierTrainer
+
+export TrainerType,
+       Regression,
+       Classification
+
+export ModelType, 
+       Linear, 
+       MultipleLinear, 
+       Polynomial, 
+       NeuralNetwork,
+       BinaryLogistic, 
+       SoftmaxLogistic, 
+       SoftmaxNeuralNetwork
+
+export RegType, 
+       None, 
+       L1, 
+       L2, 
+       ElasticNet
        
 
 include("utils.jl")
