@@ -29,7 +29,8 @@ export split_train_test,
        sample_linear_regression_data, 
        sample_multiple_linear_regression_data, 
        sample_polynomial_regression_data, 
-       sample_classification_data
+       sample_classification_data,
+       sample_binary_classification_data
 
 include("training.jl")
 export train!, r2, accuracy

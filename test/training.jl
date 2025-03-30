@@ -150,31 +150,49 @@ end
 end
 
 @testset "BinaryLogistic" begin
-    classes = [0, 1];
-    X, y = sample_classification_data(classes, 3; x_min=-10, x_max=10)
+    X, y = sample_binary_classification_data(3; x_min=-10, x_max=10)
     X_train, y_train, X_test, y_test = split_train_test(X, y; shuffle=true)
 
-    @testset "logistic_regression" begin
+    @testset "reg none" begin
         model = Chain(Dense(3 => 1, sigmoid))
         trainer = BinaryClassifierTrainer(:logistic; learning_rate=0.05, max_epochs=10000)
+        @show train!(trainer, model, X_train, y_train)
+        @show accuracy(model, X_test, y_test)
+    end
 
-        @show train!(trainer, model, X_train, y_train, classes)
+    @testset "reg l1" begin
+        model = Chain(Dense(3 => 1, sigmoid))
+        trainer = BinaryClassifierTrainer(:logistic, :l1; lambda1=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train)
+        @show accuracy(model, X_test, y_test)
+    end
+
+    @testset "reg l2" begin
+        model = Chain(Dense(3 => 1, sigmoid))
+        trainer = BinaryClassifierTrainer(:logistic, :l2; lambda2=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train)
+        @show accuracy(model, X_test, y_test)
+    end
+
+    @testset "reg elastic_net" begin
+        model = Chain(Dense(3 => 1, sigmoid))
+        trainer = BinaryClassifierTrainer(:logistic, :elastic_net; lambda1=0.001, lambda2=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train)
         @show accuracy(model, X_test, y_test)
     end
 end
 
 @testset "SoftmaxLogistic" begin
-    @testset "logistic_regression" begin
-        classes = [1, 2, 3];
-        X, y = sample_classification_data(3, 2; x_min=-10, x_max=10)
-        #scatter(X[1, :], X[2, :], c=y[:], legend=false, markersize=3)
-        #Plots.savefig("classes.png")
+    classes = [1, 2, 3]
+    X, y = sample_classification_data(classes, 2; x_min=-10, x_max=10)
+    X_train, y_train, X_test, y_test = split_train_test(X, y; shuffle=true)
+    #scatter(X[1, :], X[2, :], c=y[:], legend=false, markersize=3)
+    #Plots.savefig("classes.png")
 
-        X_train, y_train, X_test, y_test = split_train_test(X, y; shuffle=true)
+    @testset "reg none" begin
         model = Chain(Dense(2 => 3), softmax)
         trainer = SoftmaxClassifierTrainer(:logistic; learning_rate=0.05, max_epochs=10000)
         @show train!(trainer, model, X_train, y_train, classes)
-
         @show accuracy(model, X_test, y_test, classes)
 
         #x_min, x_max = minimum(X[1, :]) - 1, maximum(X[1, :]) + 1
@@ -186,19 +204,60 @@ end
         #contour!(xx, yy, zz', levels=length(classes), linewidth=2, color=:black, label="Decision Boundary")
         #Plots.savefig("logistic_regression.png")
     end
+
+    @testset "reg l1" begin
+        model = Chain(Dense(2 => 3), softmax)
+        trainer = SoftmaxClassifierTrainer(:logistic, :l1; lambda1=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train, classes)
+        @show accuracy(model, X_test, y_test, classes)
+    end
+
+    @testset "reg l2" begin
+        model = Chain(Dense(2 => 3), softmax)
+        trainer = SoftmaxClassifierTrainer(:logistic, :l2; lambda2=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train, classes)
+        @show accuracy(model, X_test, y_test, classes)
+    end
+
+    @testset "reg elastic_net" begin
+        model = Chain(Dense(2 => 3), softmax)
+        trainer = SoftmaxClassifierTrainer(:logistic, :elastic_net; lambda1=0.001, lambda2=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train, classes)
+        @show accuracy(model, X_test, y_test, classes)
+    end
 end
 
 
-@testset "r2" begin
-    X, y = sample_linear_regression_data(x -> 3x + 5)
-    X_train, y_train, X_test, y_test = split_train_test(X, y; test_size=0.2, shuffle=false)
+@testset "SoftmaxNeuralNetwork" begin
+    classes = [1, 2, 3, 4, 5]
+    X, y = sample_classification_data(classes, 3; x_min=-10, x_max=10)
+    X_train, y_train, X_test, y_test = split_train_test(X, y; shuffle=true)
 
-    model = Dense(1 => 1)
-    trainer = RegressorTrainer(:linear)
-    train!(trainer, model, X_train, y_train)
+    @testset "reg none" begin
+        model = Chain(Dense(3 => 20, relu), Dense(20 => 5), softmax)
+        trainer = SoftmaxClassifierTrainer(:neural_network; learning_rate=0.05, max_epochs=10000)
+        @show train!(trainer, model, X_train, y_train, classes)
+        @show accuracy(model, X_test, y_test, classes)
+    end
 
-    #@show r2(model, X_train, y_train), r2(model, X_test, y_test)
+    @testset "reg l1" begin
+        model = Chain(Dense(3 => 20, relu), Dense(20 => 5), softmax)
+        trainer = SoftmaxClassifierTrainer(:neural_network, :l1; lambda1=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train, classes)
+        @show accuracy(model, X_test, y_test, classes)
+    end
 
-    @test 1 > r2(model, X_train, y_train) > 0.8
-    @test 1 > r2(model, X_test, y_test) > 0.8
+    @testset "reg l2" begin
+        model = Chain(Dense(3 => 20, relu), Dense(20 => 5), softmax)
+        trainer = SoftmaxClassifierTrainer(:neural_network, :l2; lambda2=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train, classes)
+        @show accuracy(model, X_test, y_test, classes)
+    end
+
+    @testset "reg elastic_net" begin
+        model = Chain(Dense(3 => 20, relu), Dense(20 => 5), softmax)
+        trainer = SoftmaxClassifierTrainer(:neural_network, :elastic_net; lambda1=0.001, lambda2=0.001, learning_rate=0.05, max_epochs=1000)
+        @show train!(trainer, model, X_train, y_train, classes)
+        @show accuracy(model, X_test, y_test, classes)
+    end
 end

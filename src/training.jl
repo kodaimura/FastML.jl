@@ -5,7 +5,7 @@ function train!(trainer::RegressorTrainer, model, X, y)::Tuple{Bool, Int, Float6
     _train!(trainer, model, X, y, build_loss(trainer, loss_mse))
 end
 
-function train!(trainer::BinaryClassifierTrainer, model, X, y, classes)::Tuple{Bool, Int, Float64}
+function train!(trainer::BinaryClassifierTrainer, model, X, y)::Tuple{Bool, Int, Float64}
     _train!(trainer, model, X, y, build_loss(trainer, loss_binarycrossentropy))
 end
 

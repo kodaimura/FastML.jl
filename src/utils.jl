@@ -85,6 +85,10 @@ function sample_classification_data(classes = [0,1], n_features = 1; n_samples =
     return X, y
 end
 
+function sample_binary_classification_data(n_features = 1; n_samples = 100, x_min = -3, x_max = 3)
+    sample_classification_data([0,1], n_features; n_samples=n_samples, x_min=x_min, x_max=x_max)
+end
+
 function degree(f::Function)
     x_vals = collect(0:60)
     y_vals = f.(x_vals)
