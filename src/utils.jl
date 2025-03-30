@@ -21,65 +21,66 @@ function split_train_test(X, y; test_size=0.2, shuffle=true, seed=nothing)
     return X_train, y_train, X_test, y_test
 end
 
-function sample_linear_regression_data(f::Function = x -> x; samples = 100, x_min = -3, x_max = 3)
-    X = rand(Float32, samples, 1) * (x_max - x_min) .+ x_min
-    y = f.(X) .+ rand(Float32, samples)
+function sample_linear_regression_data(f::Function = x -> x; n_samples = 100, x_min = -3, x_max = 3)
+    X = rand(Float32, n_samples, 1) * (x_max - x_min) .+ x_min
+    y = f.(X) .+ rand(Float32, n_samples)
     
-    X = reshape(X, samples, 1)'
-    y = reshape(y, samples, 1)'
+    X = reshape(X, n_samples, 1)'
+    y = reshape(y, n_samples, 1)'
     
     return X, y
 end
 
-function sample_multiple_linear_regression_data(f::Function = x -> x[1] + x[2]; samples = 100, x_min = -3, x_max = 3)
+function sample_multiple_linear_regression_data(f::Function = x -> x[1] + x[2]; n_samples = 100, x_min = -3, x_max = 3)
     dim = dimension(f)
 
-    X = rand(Float32, samples, dim) * (x_max - x_min) .+ x_min
-    y = [f(x) for x in eachrow(X)] .+ rand(Float32, samples)
+    X = rand(Float32, n_samples, dim) * (x_max - x_min) .+ x_min
+    y = [f(x) for x in eachrow(X)] .+ rand(Float32, n_samples)
 
-    X = reshape(X, samples, dim)'
-    y = reshape(y, samples, 1)'
+    X = reshape(X, n_samples, dim)'
+    y = reshape(y, n_samples, 1)'
     
     return X, y
 end
 
-function sample_polynomial_regression_data(f::Function = x -> x + x^2; samples = 100, x_min = -3, x_max = 3)
+function sample_polynomial_regression_data(f::Function = x -> x + x^2; n_samples = 100, x_min = -3, x_max = 3)
     deg = degree(f)
 
-    X = rand(Float32, samples, 1) * (x_max - x_min) .+ x_min
-    y = f.(X) .+ rand(Float32, samples) * deg
+    X = rand(Float32, n_samples, 1) * (x_max - x_min) .+ x_min
+    y = f.(X) .+ rand(Float32, n_samples) * deg
     X_poly = [x ^ i for x in vec(X), i in 1:deg]
 
-    X_poly = reshape(X_poly, samples, deg)'
-    y = reshape(y, samples, 1)'
+    X_poly = reshape(X_poly, n_samples, deg)'
+    y = reshape(y, n_samples, 1)'
 
     return X_poly, y
 end
 
-function sample_classification_data(classes = 2, features = 1; samples = 100, x_min = -3, x_max = 3)
-    centers = [(rand(Float32, features) .* (x_max - x_min) .+ x_min) for _ in 1:classes]
+function sample_classification_data(classes = [0,1], n_features = 1; n_samples = 100, x_min = -3, x_max = 3)
+    n_classes = length(classes)
+    centers = [(rand(Float32, n_features) .* (x_max - x_min) .+ x_min) for _ in 1:n_classes]
     
     X = []
     y = []
-    for class in 1:classes
-        mean = centers[class]
-        cov = I(features) * 0.4
+    for i in 1:n_classes
+        mean = centers[i]
+        cov = I(n_features) * 0.4
         dist = MvNormal(mean, cov)
         
-        num_samples = samples ÷ classes
-        if class == classes
-            num_samples += samples % classes
+        n = n_samples ÷ n_classes
+        if i == n_classes
+            n += n_samples % n_classes
         end
 
-        X_class = rand(dist, num_samples)
-        y_class = fill(class, num_samples)
+        X_class = rand(dist, n)
+        y_class = fill(classes[i], n)
         
         append!(X, eachcol(X_class))
         append!(y, y_class)
     end
     
     X = Float32.(hcat(X...))
-    y = reshape(y, 1, samples)
+    y = reshape(y, 1, n_samples)
 
     return X, y
 end

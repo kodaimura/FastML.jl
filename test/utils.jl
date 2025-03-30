@@ -60,8 +60,8 @@ end
         @test all(y -> -7 ≤ y ≤ 17, vec(y))
     end
 
-    @testset "x -> 3x + 5; samples = 200, x_min=-2, x_max=2" begin
-        X, y = sample_linear_regression_data(x -> 3x + 5; samples = 200, x_min=-2, x_max=2)
+    @testset "x -> 3x + 5; n_samples = 200, x_min=-2, x_max=2" begin
+        X, y = sample_linear_regression_data(x -> 3x + 5; n_samples = 200, x_min=-2, x_max=2)
         @test size(X, 1) == 1
         @test size(X, 2) == 200
         @test size(y, 1) == 1
@@ -71,8 +71,8 @@ end
         @test all(y -> -4 ≤ y ≤ 14, vec(y))
     end
 
-    @testset "x -> 3x + 5; samples = 1" begin
-        X, y = sample_linear_regression_data(x -> 3x + 5; samples = 1)
+    @testset "x -> 3x + 5; n_samples = 1" begin
+        X, y = sample_linear_regression_data(x -> 3x + 5; n_samples = 1)
         @test size(X, 1) == 1
         @test size(X, 2) == 1
         @test size(y, 1) == 1
@@ -103,8 +103,8 @@ end
         @test all(y -> -23 ≤ y ≤ 25, vec(y))
     end
 
-    @testset "x -> 3x[1] + 2x[2] - x[3] + 1; samples = 200, x_min=-2, x_max=2" begin
-        X, y = sample_multiple_linear_regression_data(x -> 3x[1] + 2x[2] - x[3] + 1; samples = 200, x_min=-2, x_max=2)
+    @testset "x -> 3x[1] + 2x[2] - x[3] + 1; n_samples = 200, x_min=-2, x_max=2" begin
+        X, y = sample_multiple_linear_regression_data(x -> 3x[1] + 2x[2] - x[3] + 1; n_samples = 200, x_min=-2, x_max=2)
         @test size(X, 1) == 3
         @test size(X, 2) == 200
         @test size(y, 1) == 1
@@ -114,8 +114,8 @@ end
         @test all(y -> -17 ≤ y ≤ 19, vec(y))
     end
 
-    @testset "x -> 3x[1]; samples = 1" begin
-        X, y = sample_linear_regression_data(x -> 3x[1]; samples = 1)
+    @testset "x -> 3x[1]; n_samples = 1" begin
+        X, y = sample_linear_regression_data(x -> 3x[1]; n_samples = 1)
         @test size(X, 1) == 1
         @test size(X, 2) == 1
         @test size(y, 1) == 1
@@ -148,16 +148,16 @@ end
         @test all(x -> -64 ≤ x ≤ 64, X[3, :])
     end
 
-    @testset "x -> 2 + 3x + 5x^2 - 3x^3; samples = 200, x_min=-2, x_max=2" begin
-        X, y = sample_polynomial_regression_data(x -> 2 + 3x + 5x^2 - 3x^3; samples = 200, x_min=-2, x_max=2)
+    @testset "x -> 2 + 3x + 5x^2 - 3x^3; n_samples = 200, x_min=-2, x_max=2" begin
+        X, y = sample_polynomial_regression_data(x -> 2 + 3x + 5x^2 - 3x^3; n_samples = 200, x_min=-2, x_max=2)
         @test size(X, 1) == 3
         @test size(X, 2) == 200
         @test size(y, 1) == 1
         @test size(y, 2) == 200
     end
 
-    @testset "x -> 3x[1]; samples = 1" begin
-        X, y = sample_polynomial_regression_data(x -> 2 + 3x; samples = 1)
+    @testset "x -> 3x[1]; n_samples = 1" begin
+        X, y = sample_polynomial_regression_data(x -> 2 + 3x; n_samples = 1)
         @test size(X, 1) == 1
         @test size(X, 2) == 1
         @test size(y, 1) == 1
@@ -174,11 +174,11 @@ end
         @test size(y, 2) == 100
 
         #@test all(x -> -4 ≤ x ≤ 4, vec(X))
-        @test all(y -> y in (1, 2), vec(y))
+        @test all(y -> y in (0, 1), vec(y))
     end
 
-    @testset "classes = 3, features = 2" begin
-        X, y = sample_classification_data(3, 2)
+    @testset "classes = [1,2,3], features = 2" begin
+        X, y = sample_classification_data([1,2,3], 2)
         @test size(X, 1) == 2
         @test size(X, 2) == 100
         @test size(y, 1) == 1
@@ -188,19 +188,19 @@ end
         @test all(y -> y in (1, 2, 3), vec(y))
     end
 
-    @testset "classes = 5, features = 3; samples = 200, x_min=-2, x_max=2" begin
-        X, y = sample_classification_data(5, 3; samples = 200, x_min=-2, x_max=2)
+    @testset "classes = [2,4,6,8,10], features = 3; n_samples = 200, x_min=-2, x_max=2" begin
+        X, y = sample_classification_data([2,4,6,8,10], 3; n_samples = 200, x_min=-2, x_max=2)
         @test size(X, 1) == 3
         @test size(X, 2) == 200
         @test size(y, 1) == 1
         @test size(y, 2) == 200
 
         #@test all(x -> -3 ≤ x ≤ 3, vec(X))
-        @test all(y -> y in (1, 2, 3, 4, 5), vec(y))
+        @test all(y -> y in (2, 4, 6, 8, 10), vec(y))
     end
 
-    @testset "classes = 1, features = 1; samples = 1" begin
-        X, y = sample_classification_data(1, 1; samples = 1)
+    @testset "classes = [0], features = 1; n_samples = 1" begin
+        X, y = sample_classification_data([0], 1; n_samples = 1)
         @test size(X, 1) == 1
         @test size(X, 2) == 1
         @test size(y, 1) == 1
