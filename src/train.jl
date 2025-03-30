@@ -1,7 +1,7 @@
 using Flux
 using Statistics
 
-function train!(model, X, y, t::Trainer)::Tuple{Bool, Int, Float64}
+function train!(model, X, y, t)::Tuple{Bool, Int, Float64}
     loss = create_loss_function(t)
     prev_loss = Inf
     epoch_loss = 0.0
@@ -28,11 +28,11 @@ function train_model!(f_loss, model, X, y_onehot, flg::Bool; learning_rate=0.01)
     @. model[1].bias = model[1].bias - learning_rate * dLdm[:layers][1][:bias]
 end
 
-function create_loss_function(t::Trainer)
+function create_loss_function(t)
     model_type = t.model_type
-    if model_type == NeuralNetworkRegression
+    if model_type == NeuralNetwork
         return (model, X, y) -> loss_mse(model, X, y)
-    elseif model_type == LogisticRegression
+    elseif model_type == BinaryLogistic
         return (model, X, y_onehot) -> loss_logitcrossentropy(model, X, y_onehot)
     end
 
@@ -77,7 +77,7 @@ function loss_logitcrossentropy(model, X, y_onehot)
     return Flux.logitcrossentropy(y_hat, y_onehot)
 end
 
-function train!(model, X, y, classes, t::Trainer)::Tuple{Bool, Int, Float64}
+function train!(model, X, y, classes, t)::Tuple{Bool, Int, Float64}
     y_onehot = reshape(Flux.onehotbatch(y, classes), length(classes), length(y))
     loss = create_loss_function(t)
     epoch_accuracy = 0.0

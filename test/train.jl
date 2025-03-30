@@ -11,7 +11,7 @@ using Statistics
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Dense(1 => 1)
-        trainer = Trainer(:linear_regression)
+        trainer = RegressorTrainer(:linear)
         @show train!(model, X_train, y_train, trainer)
         
         #w = model.weight
@@ -26,7 +26,7 @@ using Statistics
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Dense(5 => 1)
-        trainer = Trainer(:multiple_linear_regression)
+        trainer = RegressorTrainer(:multiple_linear)
         @show train!(model, X_train, y_train, trainer)
     end
 
@@ -35,7 +35,7 @@ using Statistics
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Dense(3 => 1)
-        trainer = Trainer(:polynomial_regression; learning_rate=0.0003)
+        trainer = RegressorTrainer(:polynomial; learning_rate=0.0003)
         @show train!(model, X_train, y_train, trainer)
 
         #w = model.weight
@@ -50,7 +50,7 @@ using Statistics
         X_train, y_train, X_test, y_test = split_train_test(X, y)
         
         model = Chain(Dense(5 => 20, σ), Dense(20 => 1))
-        trainer = Trainer(:neural_network_regression; learning_rate=0.01, max_epochs=1000)
+        trainer = RegressorTrainer(:neural_network; learning_rate=0.01, max_epochs=1000)
         @show train!(model, X_train, y_train, trainer)
     end
 
@@ -62,7 +62,7 @@ using Statistics
 
         X_train, y_train, X_test, y_test = split_train_test(X, y; shuffle=true)
         model = Chain(Dense(2 => 3), softmax)
-        trainer = Trainer(:logistic_regression; learning_rate=0.05, max_epochs=10000)
+        trainer = SoftmaxClassifierTrainer(:logistic; learning_rate=0.05, max_epochs=10000)
         @show train!(model, X_train, y_train, classes, trainer)
 
         @show accuracy(model, X_test, y_test, classes)
@@ -83,7 +83,7 @@ end
     X_train, y_train, X_test, y_test = split_train_test(X, y; test_size=0.2, shuffle=false)
 
     model = Dense(1 => 1)
-    trainer = Trainer(:linear_regression)
+    trainer = RegressorTrainer(:linear)
     train!(model, X_train, y_train, trainer)
 
     #@show r2(model, X_train, y_train), r2(model, X_test, y_test)
