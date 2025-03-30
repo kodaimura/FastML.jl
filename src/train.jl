@@ -1,50 +1,51 @@
 using Flux
 using Statistics
 
-function train!(model, X, y, t)::Tuple{Bool, Int, Float64}
-    loss = create_loss_function(t)
+function train!(trainer::RegressorTrainer, model, X, y)::Tuple{Bool, Int, Float64}
+    _train!(trainer, model, X, y, build_loss(trainer, loss_mse))
+end
+
+function train!(trainer::BinaryClassifierTrainer, model, X, y, classes)::Tuple{Bool, Int, Float64}
+    y_onehot = reshape(Flux.onehotbatch(y, classes), length(classes), length(y))
+    _train!(trainer, model, X, y_onehot, build_loss(trainer, loss_binarycrossentropy))
+end
+
+function train!(trainer::SoftmaxClassifierTrainer, model, X, y, classes)::Tuple{Bool, Int, Float64}
+    y_onehot = reshape(Flux.onehotbatch(y, classes), length(classes), length(y))
+    _train!(trainer, model, X, y_onehot, build_loss(trainer, loss_logitcrossentropy))
+end
+
+function _train!(trainer, model, X, y, loss::Function)::Tuple{Bool, Int, Float64}
+    data = [(X[:, i], y[:, i]) for i in 1:size(X, 2)]
+    opt = Descent(trainer.learning_rate)
+    state = Flux.setup(opt, model)
+
     prev_loss = Inf
-    epoch_loss = 0.0
-    for epoch in 1:t.max_epochs
-        train_model!(loss, model, X, y; learning_rate=t.learning_rate)
-        epoch_loss = loss(model, X, y)
-
-        if abs(prev_loss - epoch_loss) < t.tolerance
-            return true, epoch, epoch_loss
+    curr_loss = 0.0
+    for epoch in 1:trainer.max_epochs
+        Flux.train!(loss, model, data, state)
+        curr_loss = loss(model, X, y)
+        if abs(prev_loss - curr_loss) < trainer.tolerance
+            return true, epoch, curr_loss
         end
-        prev_loss = epoch_loss
+        prev_loss = curr_loss
     end
-    return false, t.max_epochs, epoch_loss
+    return false, trainer.max_epochs, curr_loss
 end
 
-function train_model!(loss, model, X, y; learning_rate=0.01)
-    data = [(X[:, i], y[i]) for i in 1:size(X, 2)]
-    Flux.train!(loss, model, data, Descent(learning_rate))
-end
+function build_loss(trainer, loss_base::Function)
+    reg_type = trainer.reg_type
+    lambda1 = trainer.lambda1
+    lambda2 = trainer.lambda2
 
-function train_model!(f_loss, model, X, y_onehot, flg::Bool; learning_rate=0.01)
-    dLdm, _, _ = gradient(f_loss, model, X, y_onehot)
-    @. model[1].weight = model[1].weight - learning_rate * dLdm[:layers][1][:weight]
-    @. model[1].bias = model[1].bias - learning_rate * dLdm[:layers][1][:bias]
-end
-
-function create_loss_function(t)
-    model_type = t.model_type
-    if model_type == NeuralNetwork
-        return (model, X, y) -> loss_mse(model, X, y)
-    elseif model_type == BinaryLogistic
-        return (model, X, y_onehot) -> loss_logitcrossentropy(model, X, y_onehot)
-    end
-
-    reg_type = t.reg_type
     if reg_type == L1
-        return (model, X, y) -> loss_lasso(model, X, y, t.lambda1)
+        return (model, X, y) -> loss_base(model, X, y) + reg_term(model; lambda1=lambda1)
     elseif reg_type == L2
-        return (model, X, y) -> loss_ridge(model, X, y, t.lambda2)
+        return (model, X, y) -> loss_base(model, X, y) + reg_term(model; lambda2=lambda2)
     elseif reg_type == ElasticNet
-        return (model, X, y) -> loss_elastic_net(model, X, y, t.lambda1, t.lambda2)
+        return (model, X, y) -> loss_base(model, X, y) + reg_term(model; lambda1=lambda1, lambda2=lambda2)
     else
-        return (model, X, y) -> loss_mse(model, X, y)
+        return (model, X, y) -> loss_base(model, X, y)
     end
 end
 
@@ -53,23 +54,9 @@ function loss_mse(model, X, y)
     return  Flux.mse(y_hat, y)
 end
 
-function loss_reg(model, X, y; lambda1=0.0, lambda2=0.0)
-    loss = loss_mse(model, X, y)
-    l1_penalty = lambda1 * sum(abs.(model.weight))
-    l2_penalty = lambda2 * sum(model.weight .^ 2)
-    return loss + l1_penalty + l2_penalty
-end
-
-function loss_lasso(model, X, y; lambda1=0.0)
-    return loss_reg(model, X, y, lambda1=lambda1)
-end
-
-function loss_ridge(model, X, y; lambda2=0.0)
-    return loss_reg(model, X, y; lambda2=lambda2)
-end
-
-function loss_elastic_net(model, X, y; lambda1=0.0, lambda2=0.0)
-    return loss_reg(model, X, y; lambda1=lambda1, lambda2=lambda2)
+function loss_binarycrossentropy(model, X, y_onehot)
+    y_hat = model(X)
+    return Flux.binarycrossentropy(y_hat, y_onehot)
 end
 
 function loss_logitcrossentropy(model, X, y_onehot)
@@ -77,23 +64,16 @@ function loss_logitcrossentropy(model, X, y_onehot)
     return Flux.logitcrossentropy(y_hat, y_onehot)
 end
 
-function train!(model, X, y, classes, t)::Tuple{Bool, Int, Float64}
-    y_onehot = reshape(Flux.onehotbatch(y, classes), length(classes), length(y))
-    loss = create_loss_function(t)
-    epoch_accuracy = 0.0
-    for epoch in 1:t.max_epochs
-        train_model!(loss, model, X, y_onehot, true; learning_rate=t.learning_rate)
-        epoch_accuracy = accuracy(model, X, y, classes)
-        if epoch_accuracy >= 0.95
-            return true, epoch, epoch_accuracy
-        end
-    end
-    return false, t.max_epochs, epoch_accuracy
+function reg_term(model; lambda1=0.0, lambda2=0.0)
+    weights = hasproperty(model, :weight) ? model.weight : model[1].weight
+    l1_penalty = lambda1 * sum(abs.(weights))
+    l2_penalty = lambda2 * sum(weights .^ 2)
+    return  l1_penalty + l2_penalty
 end
 
 function r2(model, X, y)
     y_pred = model(X)
-    y_mean = mean(y[:])
+    y_mean = mean(vec(y))
 
     ss_tot = sum((y .- y_mean) .^ 2)
     ss_res = sum((y .- y_pred) .^ 2)

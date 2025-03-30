@@ -12,7 +12,7 @@ using Statistics
         
         model = Dense(1 => 1)
         trainer = RegressorTrainer(:linear)
-        @show train!(model, X_train, y_train, trainer)
+        @show train!(trainer, model, X_train, y_train)
         
         #w = model.weight
         #b = model.bias
@@ -27,7 +27,7 @@ using Statistics
         
         model = Dense(5 => 1)
         trainer = RegressorTrainer(:multiple_linear)
-        @show train!(model, X_train, y_train, trainer)
+        @show train!(trainer, model, X_train, y_train)
     end
 
     @testset "polynomial_regression" begin
@@ -36,7 +36,7 @@ using Statistics
         
         model = Dense(3 => 1)
         trainer = RegressorTrainer(:polynomial; learning_rate=0.0003)
-        @show train!(model, X_train, y_train, trainer)
+        @show train!(trainer, model, X_train, y_train)
 
         #w = model.weight
         #b = model.bias
@@ -51,7 +51,7 @@ using Statistics
         
         model = Chain(Dense(5 => 20, σ), Dense(20 => 1))
         trainer = RegressorTrainer(:neural_network; learning_rate=0.01, max_epochs=1000)
-        @show train!(model, X_train, y_train, trainer)
+        @show train!(trainer, model, X_train, y_train)
     end
 
     @testset "logistic_regression" begin
@@ -63,7 +63,7 @@ using Statistics
         X_train, y_train, X_test, y_test = split_train_test(X, y; shuffle=true)
         model = Chain(Dense(2 => 3), softmax)
         trainer = SoftmaxClassifierTrainer(:logistic; learning_rate=0.05, max_epochs=10000)
-        @show train!(model, X_train, y_train, classes, trainer)
+        @show train!(trainer, model, X_train, y_train, classes)
 
         @show accuracy(model, X_test, y_test, classes)
 
@@ -84,7 +84,7 @@ end
 
     model = Dense(1 => 1)
     trainer = RegressorTrainer(:linear)
-    train!(model, X_train, y_train, trainer)
+    train!(trainer, model, X_train, y_train)
 
     #@show r2(model, X_train, y_train), r2(model, X_test, y_test)
 
