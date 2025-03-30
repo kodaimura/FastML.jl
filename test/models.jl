@@ -1,9 +1,6 @@
-using Test
-using FastML
+@testset "RegressorTrainer" begin
 
-@testset "Trainer" begin
-
-    @testset "デフォルト" begin
+    @testset "Default Parameters" begin
         trainer = RegressorTrainer(:linear)
         @test trainer.trainer_type == Regression
         @test trainer.model_type == Linear
@@ -15,7 +12,7 @@ using FastML
         @test trainer.tolerance == 1e-6
     end
 
-    @testset "カスタム" begin
+    @testset "Custom Parameters" begin
         trainer = RegressorTrainer(:linear, :l1; lambda1=0.1, lambda2=0.2, learning_rate=0.05, max_epochs=500, tolerance=1e-5)
         @test trainer.trainer_type == Regression
         @test trainer.model_type == Linear
@@ -27,7 +24,7 @@ using FastML
         @test trainer.tolerance == 1e-5
     end
 
-    @testset "モデルタイプ" begin
+    @testset "Model Type Selection" begin
         trainer = RegressorTrainer(:linear)
         @test trainer.model_type == Linear
 
@@ -43,7 +40,7 @@ using FastML
         @test_throws AssertionError RegressorTrainer(:invalid_model, :l1)
     end
 
-    @testset "正則化タイプ" begin
+    @testset "Regularization Type Selection" begin
         trainer = RegressorTrainer(:linear, :none)
         @test trainer.reg_type == None
 
@@ -62,7 +59,7 @@ end
 
 @testset "BinaryClassifierTrainer" begin
 
-    @testset "デフォルト" begin
+    @testset "Default Parameters" begin
         trainer = BinaryClassifierTrainer(:logistic)
         @test trainer.trainer_type == Classification
         @test trainer.model_type == BinaryLogistic
@@ -74,7 +71,7 @@ end
         @test trainer.tolerance == 1e-6
     end
 
-    @testset "カスタム" begin
+    @testset "Custom Parameters" begin
         trainer = BinaryClassifierTrainer(:logistic, :l1; lambda1=0.1, lambda2=0.2, learning_rate=0.05, max_epochs=500, tolerance=1e-5)
         @test trainer.trainer_type == Classification
         @test trainer.model_type == BinaryLogistic
@@ -86,13 +83,13 @@ end
         @test trainer.tolerance == 1e-5
     end
 
-    @testset "モデルタイプ" begin
+    @testset "Model Type Selection" begin
         trainer = BinaryClassifierTrainer(:logistic)
         @test trainer.model_type == BinaryLogistic
         @test_throws AssertionError BinaryClassifierTrainer(:invalid_model)
     end
 
-    @testset "正則化タイプ" begin
+    @testset "Regularization Type Selection" begin
         trainer = BinaryClassifierTrainer(:logistic, :none)
         @test trainer.reg_type == None
 
@@ -110,7 +107,7 @@ end
 end
 
 @testset "SoftmaxClassifierTrainer" begin
-    @testset "デフォルト" begin
+    @testset "Default Parameters" begin
         trainer = SoftmaxClassifierTrainer(:logistic)
         @test trainer.trainer_type == Classification
         @test trainer.model_type == SoftmaxLogistic
@@ -122,7 +119,7 @@ end
         @test trainer.tolerance == 1e-6
     end
 
-    @testset "カスタム" begin
+    @testset "Custom Parameters" begin
         trainer = SoftmaxClassifierTrainer(:logistic, :l1; lambda1=0.1, lambda2=0.2, learning_rate=0.05, max_epochs=500, tolerance=1e-5)
         @test trainer.trainer_type == Classification
         @test trainer.model_type == SoftmaxLogistic
@@ -134,7 +131,7 @@ end
         @test trainer.tolerance == 1e-5
     end
 
-    @testset "モデルタイプ" begin
+    @testset "Model Type Selection" begin
         trainer = SoftmaxClassifierTrainer(:logistic)
         @test trainer.model_type == SoftmaxLogistic
 
@@ -144,7 +141,7 @@ end
         @test_throws AssertionError SoftmaxClassifierTrainer(:invalid_model)
     end
 
-    @testset "正則化タイプ" begin
+    @testset "Regularization Type Selection" begin
         trainer = SoftmaxClassifierTrainer(:logistic, :none)
         @test trainer.reg_type == None
 
