@@ -19,7 +19,7 @@ FastML は、Flux.jl のモデルをより手軽に学習できるようにし�
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/myname/FastML.jl")
+Pkg.add(url="https://github.com/kodaimura/FastML.jl")
 ```
 
 ## 使い方
